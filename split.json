@@ -1,0 +1,187 @@
+{
+  "from": {
+    "file": "/tmp/sw-site-jHjI4T/page/index.html",
+    "bytes": 18760403,
+    "sha256": "acbed7e2faf85efff9254e466e47396d9fe5653c89aa6e383dbac7370310c5f5"
+  },
+  "page": {
+    "path": "index.html",
+    "bytes": 1468343,
+    "sha256": "3342fcc1d8423bc7cc8b19ba80f6c89a55d53338ea8143de6a07ee6a059847d1"
+  },
+  "library": "/nfs/turbo/coe-kesuniot1/senseweaver/library/current",
+  "kb": "/nfs/turbo/coe-kesuniot1/senseweaver/bench/seismo-kit82-2026-11-21/kb/kb.json",
+  "files": [
+    {
+      "path": "library/P02.txt",
+      "type": "text/plain",
+      "kind": "library",
+      "id": "P02",
+      "glb": {
+        "bytes": 544216,
+        "sha256": "519f74015384f03a2fccb9788bb7731ab42bcf86e5a42b2cd33346ea26e9d5a6"
+      },
+      "library": "model.glb",
+      "bytes": 725624,
+      "sha256": "6f2fc11f252b0b0914776155e5c6bc06b2fecae4a0399328fb254ff84160a062"
+    },
+    {
+      "path": "library/HUM-adult.txt",
+      "type": "text/plain",
+      "kind": "library",
+      "id": "HUM-adult",
+      "glb": {
+        "bytes": 266668,
+        "sha256": "7bc4ef4503e643339a52b7b3b10d30ef1c06fa218571dc4773c271c6fb9b8e21"
+      },
+      "library": "model.glb",
+      "bytes": 355560,
+      "sha256": "96b96f0d3046751a1c250e0255b735474be17d1ff02926f08497a19c3061647f"
+    },
+    {
+      "path": "library/HUM-hand_right.txt",
+      "type": "text/plain",
+      "kind": "library",
+      "id": "HUM-hand_right",
+      "glb": {
+        "bytes": 54244,
+        "sha256": "e1bc7e3e0aea714d854b92d50cc801f52e888111e0f5d90c9b6e882627b69209"
+      },
+      "library": "model.glb",
+      "bytes": 72328,
+      "sha256": "c5057cca8cd1581161c140f6bfd0acdb91cf19f27f6c35bf888c919f36d46557"
+    },
+    {
+      "path": "library/PH-SchoolChair_01.txt",
+      "type": "text/plain",
+      "kind": "library",
+      "id": "PH-SchoolChair_01",
+      "glb": {
+        "bytes": 215412,
+        "sha256": "ff116f72720ed270f58b1da7b94d87a83af711759535076b1534af570489df47"
+      },
+      "library": "model.glb",
+      "bytes": 287216,
+      "sha256": "274b4d484f8ab5fd8e200283b64abb35c67f91d10ef9b41a5c15c67f222ca16b"
+    },
+    {
+      "path": "media/fig-1.png",
+      "type": "image/png",
+      "kind": "media",
+      "id": "fig-1",
+      "bytes": 206025,
+      "sha256": "d5ec5f73180632d7ed5271b2858a3e3d45c74223c059a976a47485a0240816e4"
+    },
+    {
+      "path": "media/fig-2.png",
+      "type": "image/png",
+      "kind": "media",
+      "id": "fig-2",
+      "bytes": 65820,
+      "sha256": "ddcf70c619cadf1afb25cf804b82eb47c1658d1f34e45f8053859deabea4d22d"
+    },
+    {
+      "path": "media/fig-3.png",
+      "type": "image/png",
+      "kind": "media",
+      "id": "fig-3",
+      "bytes": 46965,
+      "sha256": "0b756ae5157efeb485b7cb03ed949ab13a9af2550467270688a39caa24834ef8"
+    },
+    {
+      "path": "media/fig-4.png",
+      "type": "image/png",
+      "kind": "media",
+      "id": "fig-4",
+      "bytes": 47938,
+      "sha256": "ab07b574b5026ac1de5023ea0de7ec44f6bef5544751b9799c6653db4fb3fea6"
+    },
+    {
+      "path": "media/fig-5.png",
+      "type": "image/png",
+      "kind": "media",
+      "id": "fig-5",
+      "bytes": 138076,
+      "sha256": "615a93281e0b8113b58e64335552a0756029bbb48f3e009da8b7e04658f104ff"
+    },
+    {
+      "path": "media/fig-6.png",
+      "type": "image/png",
+      "kind": "media",
+      "id": "fig-6",
+      "bytes": 198935,
+      "sha256": "8dfe61a9c4b7d118f32b2043ee11efc8050b72fd7a89f13147fba446dea32d6a"
+    },
+    {
+      "path": "media/fig-7.png",
+      "type": "image/png",
+      "kind": "media",
+      "id": "fig-7",
+      "bytes": 71329,
+      "sha256": "ef16035984c3105249b5d60c242c93f1b6117a7a153ee049ec70cd9ab97d1fd4"
+    },
+    {
+      "path": "media/fig-8.png",
+      "type": "image/png",
+      "kind": "media",
+      "id": "fig-8",
+      "bytes": 127223,
+      "sha256": "51e3cff7a6df16559a8839568d76112dab3608991e5bb429a3e5fde38b0931d1"
+    },
+    {
+      "path": "media/tab-1.png",
+      "type": "image/png",
+      "kind": "media",
+      "id": "tab-1",
+      "bytes": 58229,
+      "sha256": "e6acf1713dc9970b5adca10c365106de42e4c99104e0a74c69eab34e6580063e"
+    },
+    {
+      "path": "media/use.jpg",
+      "type": "image/jpeg",
+      "kind": "media",
+      "id": "use",
+      "bytes": 5634176,
+      "sha256": "f0c6930242d37469e503579f1d16cdf79cf7333072b5de51d54eb704569f0318"
+    },
+    {
+      "path": "media/app.jpg",
+      "type": "image/jpeg",
+      "kind": "media",
+      "id": "app",
+      "bytes": 2065083,
+      "sha256": "d4cac60b709225ba101377decff783f2d5111f86edc6b4c48dbc2002105fcebf"
+    },
+    {
+      "path": "media/anim.jpg",
+      "type": "image/jpeg",
+      "kind": "media",
+      "id": "anim",
+      "bytes": 2556866,
+      "sha256": "3848328fd046964fd28dc7eefe22a3df5057a226ca960a8b928acc3cc541354a"
+    },
+    {
+      "path": "kg/exp-kg.json",
+      "type": "application/json",
+      "kind": "kg",
+      "id": "exp-kg",
+      "kb": true,
+      "bytes": 896270,
+      "sha256": "3691262a068aeb12209ed8d4b7b535593b842687f24182603900fd86ae1f5e40"
+    },
+    {
+      "path": "world/seismo-hospital.glb.js",
+      "type": "text/javascript",
+      "kind": "world",
+      "bytes": 1099555,
+      "sha256": "d1b07fc72c2598a53b219cdd98dd66c0f0d4e115442fcf419129363360a38efc"
+    },
+    {
+      "path": "about/assets.jpg",
+      "type": "image/jpeg",
+      "kind": "about",
+      "bytes": 255701,
+      "sha256": "a51c4183387e14b4b30743bf27ce09d141f5416df282c4171cdf4dd71a7e139f"
+    }
+  ]
+}
