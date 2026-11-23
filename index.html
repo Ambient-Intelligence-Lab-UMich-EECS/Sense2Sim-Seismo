@@ -14,6 +14,8 @@ window.S2S_HASH0 = location.hash;
 // 页面跳转到现在的第一页的…一定要保证一进去就是这一页”): tools/site.mjs --opening sets it; js/feedback.js, opening, stays as the fallback
 window.S2S_OPENING_FIRST = true;
 if (window.S2S_OPENING_FIRST && !location.hash && !navigator.webdriver) { document.documentElement.style.visibility = "hidden"; location.replace("opening/" + location.search); }
+// (and on the way in from it, the paper drawn while the simulator loads: opening/entrance.js; js/feedback.js says when it is ready)
+else if (window.S2S_OPENING_FIRST && !navigator.webdriver) document.write('<script src="opening/entrance.js"><\/script>');
 // the theme before the first paint: ?theme=light|dark, else the one last picked
 try { const t = new URLSearchParams(location.search).get("theme") || localStorage.getItem("senseweaver-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
 </script>
@@ -747,6 +749,7 @@ button.tocrow { width: 100%; font: inherit; text-align: left; cursor: pointer; }
 .about .abpv { flex: 1 1 0; min-height: 0; max-height: 180px; margin-bottom: 4px; border-radius: 8px; overflow: hidden; background: var(--line); }
 .about .abhead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .about .abpv img, .about .abpv canvas { width: 100%; height: 100%; object-fit: cover; display: block; }
+.about [data-about="assets"] .abpv img { object-position: right center; } /* (its count at its right edge) */
 .about .abpv img[hidden] { display: none; } /* (drawn in a canvas of its own: js/table.js, aboutPics) */
 .about .abpv[data-live="exp-kg"] { background: #03050a; } /* the Universe's night sky (js/flight.js) */
 /* a preview opens large on a click (js/table.js, aboutZoom; the user, 2026-11-15 16:20Z) */
@@ -1037,7 +1040,7 @@ body.nobar #dots { opacity: 0; pointer-events: none; }
 .slide[data-kind="world"] .wn.l i { grid-column: 2; }
 .slide[data-kind="world"] .wn.l b, .slide[data-kind="world"] .wn.l span { grid-column: 1; }
 .slide[data-kind="world"] .wn b { font: 700 18px/1.15 var(--font); }
-.slide[data-kind="world"] .wn b sup { margin-left: 4px; font-size: 14px; color: var(--ink-3); }
+.slide[data-kind="world"] .wn b sup { display: inline-block; height: 15px; overflow: hidden; margin-left: 4px; font-size: 14px; line-height: 15px; vertical-align: .3em; color: var(--ink-3); } /* (the room mark kept inside its name's line: MoiréWidgets' “⌂” touched the line under it) */
 .slide[data-kind="world"] .wn span { font-size: 15px; line-height: 1.22; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .slide[data-kind="world"] .wn.me i { width: 20px; height: 20px; box-shadow: 0 0 0 6px color-mix(in srgb, var(--c) 26%, transparent); }
 .slide[data-kind="world"] .wn.me b { font-size: 22px; }
@@ -1485,8 +1488,8 @@ h1, h2 { font-family: var(--serif); font-weight: 600; letter-spacing: -.01em; }
 .controls .btn.preset[aria-pressed="true"] { border-color: var(--act); background: var(--act-soft); box-shadow: inset 0 0 0 1.5px var(--act); }
 .slide[data-level="3"]:not([data-kind]) .controls { gap: 10px; }
 .slide[data-level="3"]:not([data-kind]) .slider { font-size: 22px; }
-/* the other controls, folded: they open over the lines above, so the readouts under them stay in view and the
-   column keeps its height */
+/* the other controls, folded: they open under their button, in the column (js/deck.js, fitColumn keeps the column above
+   the status line) */
 .morectl { position: relative; }
 .morectl > summary { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 15px; border-radius: 999px; border: 1px dashed var(--line-strong); font: 600 20px/1 var(--font); color: var(--ink-2); cursor: pointer; list-style: none; user-select: none; }
 .morectl > summary::-webkit-details-marker { display: none; }
@@ -1495,7 +1498,9 @@ h1, h2 { font-family: var(--serif); font-weight: 600; letter-spacing: -.01em; }
 .morectl[open] > summary::before { content: "\2212"; }
 .morectl > summary:hover { border-color: var(--accent); }
 .morectl > summary:focus-visible { outline: 3px solid var(--second); outline-offset: 3px; }
-.morectl > .controls { position: absolute; left: 0; right: 0; bottom: calc(100% + 8px); z-index: 8; padding: 16px 18px; border-radius: 14px; border: 1px solid var(--line-strong); background: var(--panel); box-shadow: 0 16px 40px rgb(0 0 0 / 28%); }
+/* (alpha.85: in the column's flow, under its button, never over the lines above: the owner, 2026-11-23, “这种overlapping是最基本的要解决的，无论哪里，都是不允许出现的”; the column fits itself, js/deck.js fitColumn) */
+.morectl > .controls { position: static; margin-top: 8px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line-strong); background: var(--panel); }
+.fitscroll { box-sizing: border-box; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 /* the paper's own number beside a readout's label */
 .ppill { display: inline-block; margin-left: 8px; padding: 3px 9px 4px; border-radius: 999px; border: 1.5px solid var(--measured); color: var(--measured); font: 600 17px/1.1 var(--mono); font-style: normal; white-space: nowrap; vertical-align: .1em; }
 .slide[data-level="3"]:not([data-kind]) .ros { gap: 8px; padding: 12px 18px; }
@@ -1720,8 +1725,8 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
       <li data-step="4"><span class="n">4</span><span><span class="pq" data-src="Fig. 5">an individualized calibration of PTT to BP is generated</span></span></li>
     </ol>
   </div>
-  <div class="panel helped rowp" data-panel="beatTrace" data-show="1" style="left:780px;width:1020px"><div class="pt">the valve opens, the pulse arrives<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> The chest's shake (SCG, blue) and the finger's pulse (PPG, red) over two beats, with the valve opening and the pulse's arrival marked.</p><p><b>How to read it</b> The gap between the two marks is PTT, and the bracket shows it getting shorter when blood pressure rises.</p></div></div>
-  <div class="capsule" data-phases='["Click · two beats, slowed down","At the chest: the valve opens","At the finger: the pulse arrives","Higher pressure: a shorter gap","A calibration turns the gap into mmHg"]'></div>
+  <div class="panel helped rowp" data-panel="beatTrace" data-show="1" style="left:780px;width:1020px"><div class="pt">the valve opens, the pulse arrives<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> The chest's shake (SCG, blue) and the finger's pulse (PPG, red) over one beat, with the valve opening and the pulse's arrival marked.</p><p><b>How to read it</b> The gap between the two marks is PTT, and the bracket shows it getting shorter when blood pressure rises.</p></div></div>
+  <div class="capsule" data-phases='["Click · one beat, slowed down","At the chest: the valve opens","At the finger: the pulse arrives","Higher pressure: a shorter gap","A calibration turns the gap into mmHg"]'></div>
 </section>
 
 <!-- 11 · What to observe -->
@@ -1822,7 +1827,7 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
       <div class="ro"><span>True PTT <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="pttTrue">&ndash;</b></div>
     </div>
   </div>
-  <div class="panel shown helped rowp" data-panel="pttBias" style="left:780px;width:1020px"><div class="pt">two clocks<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> The SCG as the accelerometer stamps it sits far off the camera's clock, so its AO, and the PTT read from it, are wrong.</p><p><b>How to read it</b> Red: the PPG and its arrival; blue: the SCG as stamped, faint where it truly is; gold brackets: each PTT read; right: one beep.</p></div></div>
+  <div class="panel shown helped rowp" data-panel="pttBias" style="left:780px;width:1020px"><div class="pt">two clocks<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> The SCG as the accelerometer stamps it sits far off the camera's clock, so its AO, and the PTT read from it, are wrong.</p><p><b>How to read it</b> Red: the PPG and its arrival; blue: the SCG as stamped; gold brackets: each PTT read. Right, as in Fig. 3: blue mic audio, orange z-axis.</p></div></div>
   <div class="capsule"></div>
   <button type="button" class="btn demo">&#9654; Auto demo</button>
 </section>
@@ -1850,7 +1855,7 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
       <div class="ro"><span>Offset found <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="offset">&ndash;</b></div>
     </div>
   </div>
-  <div class="panel shown helped rowp" data-panel="beeps" style="left:780px;width:560px"><div class="pt">three beeps<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> Each beep is heard twice, by the microphone on the camera's clock and by the z-axis on the accelerometer's, and their gap is the offset.</p><p><b>How to read it</b> Time runs left to right: orange is the microphone's audio, blue the z-axis acceleration, and arrows mark each beep's offset, as in Fig. 3.</p></div></div>
+  <div class="panel shown helped rowp" data-panel="beeps" style="left:780px;width:560px"><div class="pt">three beeps<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> Each beep is heard twice, by the microphone on the camera's clock and by the z-axis on the accelerometer's, and their gap is the offset.</p><p><b>How to read it</b> Time runs left to right: blue is the microphone's audio on the camera's clock, orange the z-axis on the accelerometer's, as in Fig. 3; arrows mark each offset.</p></div></div>
   <div class="panel shown helped rowp" data-panel="pttBias" style="left:1360px;width:440px"><div class="pt">the SCG's timing<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above tip-right" role="tooltip"><p><b>It shows</b> As stamped, the SCG's AO comes late; shifted by the offset, it falls back before each arrival, and the PTT read matches.</p><p><b>How to read it</b> Red: the PPG and its arrival; blue: the SCG as stamped, then shifted back; gold brackets: each PTT read; numbers below.</p></div></div>
   <div class="capsule"></div>
 </section>
@@ -1925,7 +1930,7 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
     </div>
   </div>
   <div class="panel shown helped rowp" data-panel="morph" style="left:780px;width:330px"><div class="pt">SCG shapes<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> Fig. 4's three SCG beat shapes, which change with the person and the phone's place; the model's beat now is lit.</p><p><b>How to read it</b> Each beat, band-passed, runs left to right: MC up, IM down, AO up, MA down; each shape is scaled to its own height.</p></div></div>
-  <div class="panel shown helped rowp" data-panel="scgSearch" style="left:1130px;width:680px"><div class="pt">the AO search<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> The SCG before each pulse arrival; with no IM check, at the sternum MA is taken for IM, so AO lands late and PTT is short.</p><p><b>How to read it</b> Box: the beat the readouts read; its error is its PTT less its true PTT. Grey: raw; blue: its slow part, breathing, four times taller; gold: band-passed; ring: picked IM; thin line: the true PTT; no AO: a beat left out.</p></div></div>
+  <div class="panel shown helped rowp" data-panel="scgSearch" style="left:1130px;width:680px"><div class="pt">the AO search<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> The SCG before each pulse arrival; with no IM check, at the sternum MA is taken for IM, so AO lands late and PTT is short.</p><p><b>How to read it</b> Box: the beat the readouts read, its MC, IM, true AO and MA dotted and named; AO found: the search's pick; its error is its PTT less its true PTT. Grey: raw; blue: its slow part, breathing, four times taller; gold: band-passed; ring: picked IM; thin line: the true PTT; no AO: a beat left out.</p></div></div>
   <div class="capsule"></div>
   <button type="button" class="btn demo">&#9654; Auto demo</button>
 </section>
@@ -1941,7 +1946,7 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
       <li data-step="1" data-at="panel:scgSearch"><button type="button" class="n" aria-label="Back to step 1">1</button><span><span class="ours" title="Our words, not the paper’s">New: the band-pass removes breathing</span></span></li>
       <li data-step="2" data-at="panel:scgSearch"><button type="button" class="n" aria-label="Back to step 2">2</button><span><span class="ours" title="Our words, not the paper’s">Each APG peak opens a search window</span></span></li>
       <li data-step="3" data-at="panel:scgSearch"><button type="button" class="n" aria-label="Back to step 3">3</button><span><span class="ours" title="Our words, not the paper’s">The most prominent dip is taken as IM</span> <span class="pq pcite" data-src="Fig. 4" data-pq="The SCG is produced by the consecutive mechanical movements during a heartbeat (MC, IM, AO, then MA)"></span></span></li>
-      <li data-step="4" data-at="panel:scgSearch"><button type="button" class="n" aria-label="Back to step 4">4</button><span><span class="ours" title="Our words, not the paper’s">Over 90 %, the dip ahead is IM</span></span></li>
+      <li data-step="4" data-at="panel:scgSearch"><button type="button" class="n" aria-label="Back to step 4">4</button><span><span class="ours" title="Our words, not the paper’s">Over 90 %, the deepest dip is MA</span></span></li>
       <li data-step="5" data-at="ro:ptt"><button type="button" class="n" aria-label="Back to step 5">5</button><span><span class="ours" title="Our words, not the paper’s">AO: the next peak; PTT: the median gap</span></span></li>
       <li data-step="6" class="turn" data-at="ctl:imcheck"><button type="button" class="n" aria-label="Back to step 6">6</button><span><b class="yt">Your turn</b> <span class="ours" title="Our words, not the paper’s">Switch both off</span></span></li>
     </ol>
@@ -1956,7 +1961,7 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
     </div>
   </div>
   <div class="panel shown helped rowp" data-panel="morph" style="left:780px;width:330px"><div class="pt">SCG shapes<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> Fig. 4's three SCG beat shapes, which change with the person and the phone's place; the model's beat now is lit.</p><p><b>How to read it</b> Each beat, band-passed, runs left to right: MC up, IM down, AO up, MA down; each shape is scaled to its own height.</p></div></div>
-  <div class="panel shown helped rowp" data-panel="scgSearch" style="left:1130px;width:680px"><div class="pt">the AO search<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> The paper's search acted out: filter, a window before each APG peak, IM with its check, then AO, so PTT lands on the truth.</p><p><b>How to read it</b> Gold: band-passed; shaded: search window; rings: IM and MA set aside; triangle: AO and its PTT; thin line: true PTT; no AO: beat left out.</p></div></div>
+  <div class="panel shown helped rowp" data-panel="scgSearch" style="left:1130px;width:680px"><div class="pt">the AO search<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> The paper's search acted out: filter, a window before each APG peak, IM with its check, then AO, so PTT lands on the truth.</p><p><b>How to read it</b> Gold: band-passed; shaded: search window; rings: IM and MA set aside; triangle: AO found and its PTT; thin line: true PTT; no AO: beat left out.</p></div></div>
   <div class="capsule"></div>
 </section>
 
@@ -2021,7 +2026,7 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
   <div class="text">
     <div class="eyebrow">End-to-end</div>
     <h2>A blood pressure reading from the phone on the chest</h2>
-    <p class="why"><span class="more"><span class="ours" title="Our words, not the paper’s"><b>Our goal:</b> take a reading as a Seismo user does.</span><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip"><span class="ours" title="Our words, not the paper’s">The phone presses on the left chest and a fingertip covers its camera. Move it with the mouse, or with your own hand through the camera.</span></span></span></p>
+    <p class="why"><span class="more"><span class="ours" title="Our words, not the paper’s"><b>Our goal:</b> take a reading as a Seismo user does.</span><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip"><span class="ours" title="Our words, not the paper’s">The phone lies nearly level, its bottom end on the chest; the left hand's fingers hold it there from below, and the right index fingertip covers the back camera at its far end. Move it with the mouse, or with your own hand through the camera.</span></span></span></p>
     <ol class="tasks">
       <li data-task="camera"><span class="n"><span>1</span></span><span>Switch <b>Camera</b> on (<kbd>C</kbd>)</span></li>
       <li data-task="clavicle"><span class="n"><span>2</span></span><span>Move the phone up below the clavicle</span></li>
@@ -2062,7 +2067,7 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
     <div class="tocs">More Views</div>
     <div class="tocg"><a class="tocrow lit" href="#exp-kg2" data-name="Sensing Universe: More Views"><span class="tn">&#9678;</span><span class="tt"><b>Sensing Universe</b><small>Citations, similar technique, and gaps.</small></span></a></div>
     <div class="tocl">Explore Simulator</div>
-    <div class="tocsets" style="--n:2"><div class="tocset check"><div class="tocs">Check the Paper</div><div class="tocg one"><a class="tocrow q" href="#sim-real"><span class="tn">1</span><span class="tt"><b>Real-to-Simulation Gap</b><small>How close is our simulator to the paper's study?</small></span></a><a class="tocrow q" href="#exp-ablation"><span class="tn">2</span><span class="tt"><b>Ablation study</b><small>Which step of Seismo matters most for the PTT and the DBP?</small></span></a><a class="tocrow q" href="#exp-related"><span class="tn">3</span><span class="tt"><b>Comparison with related work</b><small>What would an ECG or a heart sound read in place of the SCG?</small></span></a></div></div><div class="tocset beyond"><div class="tocs">Go Beyond the Paper</div><div class="tocg one"><a class="tocrow q" href="#exp-general"><span class="tn">4</span><span class="tt"><b>Generalization study</b><small>When does Seismo stop finding the heart's AO peak?</small></span></a><a class="tocrow q" href="#exp-physics"><span class="tn">5</span><span class="tt"><b>Physical conditions</b><small>Would a better camera, accelerometer or cuff improve Seismo?</small></span></a><a class="tocrow q" href="#exp-array"><span class="tn">6</span><span class="tt"><b>Device design</b><small>Where on the chest, and how quiet, must the one accelerometer be?</small></span></a></div></div></div>
+    <div class="tocsets" style="--n:2"><div class="tocset check"><div class="tocs">Check the Paper</div><div class="tocg one"><a class="tocrow q" href="#sim-real"><span class="tn">1</span><span class="tt"><b>Real-to-Simulation Gap</b><small>How close is our simulator to the paper's study?</small></span></a><a class="tocrow q" href="#exp-ablation"><span class="tn">2</span><span class="tt"><b>Ablation study</b><small>Which step of Seismo matters most for the PTT and the DBP?</small></span></a><a class="tocrow q" href="#exp-related"><span class="tn">3</span><span class="tt"><b>Comparison with related work</b><small>What would an ECG or a heart sound read in place of the SCG?</small></span></a></div></div><div class="tocset beyond"><div class="tocs">Go Beyond the Paper</div><div class="tocg one"><a class="tocrow q" href="#exp-general"><span class="tn">4</span><span class="tt"><b>Generalization study</b><small>When does Seismo stop finding the heart's AO peak?</small></span></a><a class="tocrow q" href="#exp-physics"><span class="tn">5</span><span class="tt"><b>Physical conditions</b><small>Would a better camera, accelerometer or cuff improve Seismo?</small></span></a><a class="tocrow q" href="#exp-array"><span class="tn">6</span><span class="tt"><b>Device design</b><small>Where, and how quiet, must the accelerometer be?</small></span></a></div></div></div>
     <div class="tocl">Done?</div>
     <button type="button" class="tocrow end" data-end="ask"><span class="tn">&#10003;</span><span class="tt"><b>End exploration</b><small>Finish here; you can still come back.</small></span></button>
   </div>
@@ -2152,11 +2157,12 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
 </section>
 
 <!-- 28 · Exploration 1 · Real-to-Simulation Gap -->
-<section class="slide dense" id="sim-real" data-name="Exploration 1 · Real-to-Simulation Gap" data-level="3" data-part="3 · Explore" data-home="explore" data-marks="public:skip authors:close researchers:close educators:skip" data-steps="5" data-camera="hand" data-still="4">
+<section class="slide dense" id="sim-real" data-name="Exploration 1 · Real-to-Simulation Gap" data-level="3" data-part="3 · Explore" data-home="explore" data-marks="public:skip authors:close researchers:close educators:skip" data-steps="5" data-camera="hand">
   <div class="text">
     <div class="eyebrow set check">Check the Paper &middot; 1 of 3</div>
     <h2>Real-to-Simulation Gap</h2>
     <p class="ask"><b>Question</b> <span class="more">How close is our simulator to the paper's study?<button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">We run the paper's protocol through our model: 7 subjects, 4 days, 7 measurements a day, day 1 calibrating each person. Our numbers stand beside Table 1 and Figs. 6 to 8.</span></span></p>
+    <p class="why box"><span class="more"><span class="ours" title="Our words, not the paper’s"><b>Why our R is higher</b> The paper's arm cuff errs too, which lowers its R; ours errs only 4&nbsp;mmHg (assumed).</span><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip"><span class="ours" title="Our words, not the paper’s">The paper scores the phone against the cuff. Our mean R falls as the cuff errs more: 0.88 exact, 0.72 at 4 mmHg, 0.38 at 8 mmHg; the paper's is 0.55. Between 4 and 8 mmHg, our R meets the paper's. The paper too says some of its gap to other studies is likely its cuff.</span></span></span></p>
     <dl class="fcw"><div class="ch"><dt>You change</dt><dd>the cuff's own error (assumed)</dd></div></dl>
     <ol class="turns">
       <li class="turn has" data-n="1" data-at="pre:exact"><span class="n">1</span><span class="tsay"><b class="yt">Your turn</b> Press</span><span class="tctl controls"><button type="button" class="btn preset" data-preset="exact" data-to='{"cuffErr":0}' aria-pressed="false">Exact cuff</button></span><span class="more tmore"><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The cuff then reads the true DBP. What error is left is the phone's own: its PTT and the fit of K1 and K2.</span></span></li>
@@ -2164,25 +2170,19 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
       <li class="turn has" data-n="3" data-at="pre:assumed"><span class="n">3</span><span class="tsay"><b class="yt">Your turn</b> Press</span><span class="tctl controls"><button type="button" class="btn preset" data-preset="assumed" data-to='{"cuffErr":4}' aria-pressed="false">Cuff error 4&nbsp;mmHg</button></span><span class="more tmore"><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">Our assumed cuff: the paper gives no error for it. We set it so our mean RMSE lands near the paper's.</span></span></li>
     </ol>
     <button type="button" class="allctl">Show all controls</button>
-    <details class="morectl"><summary>More controls</summary>
-    <div class="controls">
-      <label class="slider"><span>Subject marked</span><input type="range" data-ctl="subject" data-view min="1" max="7" step="1" value="3"><output data-val="subject" data-fmt="Subject {v}">Subject 3</output></label>
-      <div class="choice" role="group" aria-label="Effort marked"><span>Effort marked</span><button type="button" class="pick" data-ctl="effort" data-view data-set="0" aria-pressed="true">rest</button><button type="button" class="pick" data-ctl="effort" data-view data-set="1" aria-pressed="false">50 %</button><button type="button" class="pick" data-ctl="effort" data-view data-set="2" aria-pressed="false">75 %</button><button type="button" class="pick" data-ctl="effort" data-view data-set="3" aria-pressed="false">100 %</button></div>
-    </div>
-    </details>
-    <div class="tabs"><span data-tab="0">Table 1</span><span data-tab="1">Fig. 6</span><span data-tab="2">Fig. 7</span><span data-tab="3">Fig. 8</span><span data-tab="4">Original</span><span data-tab="5">Video</span></div>
+    <div class="tabs"><span data-tab="0">Table 1</span><span data-tab="1">Fig. 6</span><span data-tab="2">Fig. 7</span><span data-tab="3">Paper 7</span><span data-tab="4">Fig. 8</span><span data-tab="5">Paper 8</span></div>
     <div class="only" data-only="0">
       <div class="ros">
-        <div class="ro est"><span>Mean R, 7 subjects <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="measured by the authors">paper 0.55</i></span><b data-ro="rMean">&ndash;</b></div>
-        <div class="ro est"><span>Mean RMSE, 7 subjects <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="measured by the authors">paper 5.2 mmHg</i></span><b data-ro="rmseMean">&ndash;</b></div>
-        <div class="ro est"><span>R, subject marked <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="rSub">&ndash;</b></div>
+        <div class="ro est"><span>Mean R <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="measured by the authors">paper 0.55</i></span><b data-ro="rMean">&ndash;</b></div>
+        <div class="ro est"><span>Mean RMSE <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="measured by the authors">paper 5.2 mmHg</i></span><b data-ro="rmseMean">&ndash;</b></div>
+        <div class="ro est"><span>Mean R at 0 · 4 · 8 mmHg <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="rCuff">&ndash;</b></div>
       </div>
       <p class="result"><b>What you saw</b> <span class="more"><span data-ro="saw0"></span><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">Day 1 fits each person's K1 and K2; days 2 to 4 are tested. Our subjects are drawn from Table 1's DBP ranges, not from their recordings.</span></span><span class="rq"><span class="rqt"><span class="pq" data-src="Results">The average Pearson correlation coefficient across all participants is 0.55 and the average RMSE is 5.2 mmHg across participants</span></span> <span class="pq pcite" data-src="Results" data-pq="The average Pearson correlation coefficient across all participants is 0.55 and the average RMSE is 5.2 mmHg across participants"></span></span></p>
     </div>
     <div class="only" data-only="1">
       <div class="ros">
-        <div class="ro est"><span>R, ours, days 2–4 (147 pairs) <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="measured by the authors">paper 0.81</i></span><b data-ro="rAll">&ndash;</b></div>
-        <div class="ro est"><span>RMSE, ours, days 2–4 (147 pairs) <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="measured by the authors">paper 6.7 mmHg</i></span><b data-ro="rmseAll">&ndash;</b></div>
+        <div class="ro est"><span>R, days 2–4 <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="measured by the authors">paper 0.81</i></span><b data-ro="rAll">&ndash;</b></div>
+        <div class="ro est"><span>RMSE, days 2–4 <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="measured by the authors">paper 6.7 mmHg</i></span><b data-ro="rmseAll">&ndash;</b></div>
         <div class="ro est"><span>Bland–Altman mean <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="measured by the authors">paper 1.3 mmHg</i></span><b data-ro="baMean">&ndash;</b></div>
       </div>
       <p class="result"><b>What you saw</b> <span class="more"><span data-ro="saw1"></span><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The paper gives R and RMSE for all seven participants' estimates with each person's calibration. Ours uses our 147 estimated pairs, days 2 to 4, after day 1's calibration.</span></span><span class="rq"><span class="rqt"><span class="pq" data-src="Results">we find the Pearson correlation coefficient = 0.81 with an RMSE = 6.7mmHg</span></span> <span class="pq pcite" data-src="Results" data-pq="we find the Pearson correlation coefficient = 0.81 with an RMSE = 6.7mmHg"></span></span></p>
@@ -2196,6 +2196,9 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
       <p class="result"><b>What you saw</b> <span class="more"><span data-ro="saw2"></span><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The text says 94&nbsp;% under 15&nbsp;mmHg; Fig. 7 prints 0.95. The window marks the figure's three points.</span></span><span class="rq"><span class="rqt"><span class="pq" data-src="Results">67% of absolute errors fall under 5 mmHg, 87% fall under 10 mmHg, and 94% fall under 15 mmHg</span></span> <span class="pq pcite" data-src="Results" data-pq="67% of absolute errors fall under 5 mmHg, 87% fall under 10 mmHg, and 94% fall under 15 mmHg"></span></span></p>
     </div>
     <div class="only" data-only="3">
+      <p class="why"><span class="more"><b>The paper's Fig. 7.</b> Its share of errors under each size.<button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The previous tab draws this curve through the figure's marks, beside ours at each cuff error.</span></span></p>
+    </div>
+    <div class="only" data-only="4">
       <div class="ros">
         <div class="ro est"><span>R, subject 3 <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="measured by the authors">paper 0.68</i></span><b data-ro="r3">&ndash;</b></div>
         <div class="ro est"><span>R, subject 4 <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="measured by the authors">paper 0.20</i></span><b data-ro="r4">&ndash;</b></div>
@@ -2203,25 +2206,19 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
       </div>
       <p class="result"><b>What you saw</b> <span class="more"><span data-ro="saw3"></span><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The paper says subject 4 has sessions where the cuff stayed unchanged. Our model holds it at rest in every session (assumed); the PTT still falls with effort.</span></span><span class="rq" data-k="s4"><span class="rqt"><span class="pq" data-src="Discussion: Limitations">the participant with the lowest correlation, Subject-4, has sessions where his/her reference blood pressure remain unchanged even after intense biking</span></span> <span class="pq pcite" data-src="Discussion: Limitations" data-pq="the participant with the lowest correlation, Subject-4, has sessions where his/her reference blood pressure remain unchanged even after intense biking"></span></span></p>
     </div>
-    <div class="only" data-only="4">
-      <p class="why"><span class="more"><b>The paper's Fig. 8.</b> Each of subject 3's and subject 4's four days, and their average, against effort.<button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The previous tab draws the paper's averages, read off this figure, beside our four days and their average.</span></span></p>
-    </div>
     <div class="only" data-only="5">
-      <p class="why"><span class="more"><b>The real system.</b> A person holds the phone on the chest, a finger over the camera, as in Fig. 1.<button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The authors' video, 0:03 to 0:25. The app draws the pulse at the finger and the heartbeat on the chest; our simulator makes both signals.</span></span></p>
-      <a class="btn link" href="https://www.youtube.com/watch?v=Xd6hSQYHVCc" target="_blank" rel="noopener">The full video on YouTube ↗</a>
+      <p class="why"><span class="more"><b>The paper's Fig. 8.</b> Subjects 3 and 4, each day and the average, against effort.<button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The previous tab draws the paper's averages, read off this figure, beside our four days and their average.</span></span></p>
     </div>
   </div>
-  <div class="panel shown helped" data-panel="subj" data-only="0" style="left:780px;top:170px;width:1020px;height:220px"><div class="pt">R per subject (Table 1)<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-below" role="tooltip"><p><b>It shows</b> Each subject's R between estimate and cuff, the paper's beside ours (days 2–4 tested), so each subject can be compared.</p><p><b>How to read it</b> Bars in pairs, one pair a subject: light the paper's, coloured ours; the subject marked is outlined.</p></div></div>
-  <div class="panel shown helped" data-panel="subjRmse" data-only="0" style="left:780px;top:400px;width:1020px;height:220px"><div class="pt">RMSE per subject, <span class="lc">mmHg</span> (Table 1)<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> Each subject's RMSE of the estimate against the cuff, beside the paper's, so the size of our error can be judged against theirs.</p><p><b>How to read it</b> Bars in pairs, one pair a subject: light the paper's, coloured ours; lower is better.</p></div></div>
-  <div class="panel shown helped" data-panel="tab1" data-only="0" style="left:780px;top:630px;width:1020px;height:360px"><div class="pt">Table 1, the paper's numbers beside ours<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> The paper's Table 1: each participant's age, sex, size, DBP ranges, RMSE and R; our RMSE and R beside them.</p><p><b>How to read it</b> One row a subject, then the mean and SD; our columns are coloured; our subjects are drawn from these DBP ranges.</p></div></div>
-  <div class="panel shown helped" data-panel="corr" data-only="1" style="left:780px;top:170px;width:505px;height:410px"><div class="pt">estimate against cuff (<span class="lc">Fig</span>. 6, top)<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-below" role="tooltip"><p><b>It shows</b> Our 147 estimates of days 2–4 against the cuff, with our R and RMSE under the paper's: points near the dashed line are good estimates.</p><p><b>How to read it</b> Cuff DBP across, our estimate up; the dashed line is where the two agree; the subject marked is dark.</p></div></div>
+  <div class="panel shown helped" data-panel="subj" data-only="0" style="left:780px;top:170px;width:1020px;height:405px"><div class="pt">R per subject (Table 1)<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-below" role="tooltip"><p><b>It shows</b> Each subject's R, the paper's beside ours (days 2–4 tested); the lines across show the mean R falling as the cuff errs more.</p><p><b>How to read it</b> Bars in pairs, light the paper's, coloured ours; dashed line the paper's mean; ours solid at the cuff shown, dotted at the other two.</p></div></div>
+  <div class="panel shown helped" data-panel="subjRmse" data-only="0" style="left:780px;top:585px;width:1020px;height:405px"><div class="pt">RMSE per subject, <span class="lc">mmHg</span> (Table 1)<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> Each subject's RMSE of the estimate against the cuff, beside the paper's, so the size of our error can be judged against theirs.</p><p><b>How to read it</b> Bars in pairs, one pair a subject: light the paper's, coloured ours; lower is better.</p></div></div>
+  <div class="panel shown helped" data-panel="corr" data-only="1" style="left:780px;top:170px;width:505px;height:410px"><div class="pt">estimate against cuff (<span class="lc">Fig</span>. 6, top)<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-below" role="tooltip"><p><b>It shows</b> Our 147 estimates of days 2–4 against the cuff, with our R and RMSE under the paper's: points near the dashed line are good estimates.</p><p><b>How to read it</b> Cuff DBP across, our estimate up; the dashed line is where the two agree; subject 3 is dark.</p></div></div>
   <div class="panel shown helped" data-panel="ba" data-only="1" style="left:780px;top:590px;width:505px;height:400px"><div class="pt">Bland–Altman (<span class="lc">Fig</span>. 6, bottom)<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-above" role="tooltip"><p><b>It shows</b> Each estimate's error against the cuff, with mean and ±1.96 SD lines, ours beside the paper's, so the two spreads compare.</p><p><b>How to read it</b> Cuff DBP across, error up; the paper's lines dashed, ours solid; their values are written under the plot.</p></div></div>
   <div class="panel shown helped" data-panel="fig6" data-only="1" style="left:1295px;top:170px;width:505px;height:820px"><div class="pt">the paper's <span class="lc">Fig</span>. 6<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-over" role="tooltip"><p><b>It shows</b> The paper's own figure: the DBP estimated with each person's own calibration against the cuff, coloured by participant, and its Bland–Altman plot.</p><p><b>How to read it</b> Top: estimate against cuff; bottom: the error against the cuff, with its mean and ±1.96 SD.</p></div></div>
-  <div class="panel shown helped" data-panel="cdf" data-only="2" style="left:780px;top:170px;width:600px;height:820px"><div class="pt">share of errors under a size (<span class="lc">Fig</span>. 7)<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-over" role="tooltip"><p><b>It shows</b> How many of our errors fall under each size, against the paper's curve through its marks, so the two spreads compare.</p><p><b>How to read it</b> Error size across, share up; the paper's dashed through its dots, its largest error a ring; ours solid.</p></div></div>
-  <div class="panel shown helped" data-panel="fig7" data-only="2" style="left:1390px;top:170px;width:410px;height:820px"><div class="pt">the paper's <span class="lc">Fig</span>. 7<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-over tip-right" role="tooltip"><p><b>It shows</b> The paper's own CDF of the absolute error, with its marks at 5, 10 and 15 mmHg.</p><p><b>How to read it</b> Error across, the share of errors under it up.</p></div></div>
-  <div class="panel shown helped" data-panel="trend" data-only="3" style="left:780px;top:170px;width:1020px;height:820px"><div class="pt">subjects 3 and 4 across effort (<span class="lc">Fig</span>. 8)<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-over" role="tooltip"><p><b>It shows</b> 1/PTT and the cuff's DBP over the seven measurements: our four days and their average beside the paper's average.</p><p><b>How to read it</b> Left subject 3, right subject 4; top 1/PTT, bottom DBP; thin lines our days, dashed the paper's average; shaded the effort marked.</p></div></div>
-  <div class="panel shown helped" data-panel="fig8" data-only="4" style="left:780px;top:170px;width:1020px;height:820px"><div class="pt">the paper's <span class="lc">Fig</span>. 8<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-over" role="tooltip"><p><b>It shows</b> The paper's own figure, each of the four days and their average: subject 4's DBP does not follow its 1/PTT.</p><p><b>How to read it</b> Top rows 1/PTT, bottom rows DBP, against effort; each day a colour, the average grey.</p></div></div>
-  <div class="panel shown helped" data-panel="clip" data-only="5" style="left:780px;top:170px;width:1020px;height:700px"><div class="pt">the authors' video<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-over" role="tooltip"><p><b>It shows</b> The real Seismo app at work, which our simulator stands in for.</p><p><b>How to read it</b> Click to play; it loops while the tab is open.</p></div></div>
+  <div class="panel shown helped" data-panel="cdf" data-only="2" style="left:780px;top:170px;width:1020px;height:820px"><div class="pt">share of errors under a size (<span class="lc">Fig</span>. 7)<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-over" role="tooltip"><p><b>It shows</b> How many of our errors fall under each size, against the paper's curve through its marks, so the two spreads compare.</p><p><b>How to read it</b> Error size across, share up; the paper's dashed through its dots, its largest error a ring; ours solid.</p></div></div>
+  <div class="panel shown helped" data-panel="fig7" data-only="3" style="left:780px;top:170px;width:1020px;height:820px"><div class="pt">the paper's <span class="lc">Fig</span>. 7<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-over" role="tooltip"><p><b>It shows</b> The paper's own CDF of the absolute error, with its marks at 5, 10 and 15 mmHg.</p><p><b>How to read it</b> Error across, the share of errors under it up.</p></div></div>
+  <div class="panel shown helped" data-panel="trend" data-only="4" style="left:780px;top:170px;width:1020px;height:820px"><div class="pt">subjects 3 and 4 across effort (<span class="lc">Fig</span>. 8)<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-over" role="tooltip"><p><b>It shows</b> 1/PTT and the cuff's DBP over the seven measurements: our four days and their average beside the paper's average.</p><p><b>How to read it</b> Left subject 3, right subject 4; top 1/PTT, bottom DBP; thin lines our days, dashed the paper's average.</p></div></div>
+  <div class="panel shown helped" data-panel="fig8" data-only="5" style="left:780px;top:170px;width:1020px;height:820px"><div class="pt">the paper's <span class="lc">Fig</span>. 8<button type="button" class="tip" aria-label="How to read this window">i</button></div><canvas></canvas><div class="wtip tip-over" role="tooltip"><p><b>It shows</b> The paper's own figure, each of the four days and their average: subject 4's DBP does not follow its 1/PTT.</p><p><b>How to read it</b> Top rows 1/PTT, bottom rows DBP, against effort; each day a colour, the average grey.</p></div></div>
   <div class="capsule"></div>
 </section>
 
@@ -2256,10 +2253,9 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
     </details>
     <div class="ros">
       <div class="ro est"><span>PTT error, this try <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="yours">&ndash;</b></div>
-      <div class="ro"><span>PTT error, all on <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="full">&ndash;</b></div>
       <div class="ro est"><span>DBP RMSE, this try <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="rmse">&ndash;</b></div>
       <div class="ro"><span>DBP RMSE, all on <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="as the paper gives it">Table 1 mean 5.2 mmHg</i></span><b data-ro="rmseFull">&ndash;</b></div>
-      <div class="ro"><span>Beat where the phone is <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="beat">&ndash;</b></div>
+      <div class="ro"><span>Beat at the phone <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="beat">&ndash;</b></div>
     </div>
     <p class="result"><b>What you saw</b> <span class="more"><span data-ro="saw"></span><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">PTT error: the rolling 30&nbsp;s median against the model's true PTT. DBP RMSE: this subject's four days, day 1 calibrating, days 2–4 tested, as the paper's protocol.</span></span><span class="rq" data-k="sync"><span class="rqt"><span class="pq" data-src="Synchronization">The Android SDK does not guarantee perfect synchronization between different sensor subsystems</span></span> <span class="pq pcite" data-src="Synchronization" data-pq="The Android SDK does not guarantee perfect synchronization between different sensor subsystems"></span></span><span class="rq" data-k="bandpass"><span class="rqt"><span class="pq" data-src="PTT Calculation">Figure 5 shows the SCG waveform captured by the accelerometer after bandpass filtering</span></span> <span class="pq pcite" data-src="PTT Calculation" data-pq="Figure 5 shows the SCG waveform captured by the accelerometer after bandpass filtering"></span></span><span class="rq" data-k="apg"><span class="rqt"><span class="pq" data-src="PTT Calculation">the peak of the APG accentuates when the pulse shows up at the finger</span></span> <span class="pq pcite" data-src="PTT Calculation" data-pq="the peak of the APG accentuates when the pulse shows up at the finger"></span></span><span class="rq" data-k="imcheck"><span class="rqt"><span class="pq" data-src="PTT Calculation">for certain SCG morphologies, in particular those recorded closer to the sternum, the MA point can have a similar prominence as the IM point</span></span> <span class="pq pcite" data-src="PTT Calculation" data-pq="for certain SCG morphologies, in particular those recorded closer to the sternum, the MA point can have a similar prominence as the IM point"></span></span><span class="rq" data-k="median"><span class="rqt"><span class="pq" data-src="PTT Calculation">the time difference is calculated for each AO and APG peak pair, with the median taken as the PTT</span></span> <span class="pq pcite" data-src="PTT Calculation" data-pq="the time difference is calculated for each AO and APG peak pair, with the median taken as the PTT"></span></span><span class="rq" data-k="calib"><span class="rqt"><span class="pq" data-src="Blood Pressure Calculation">To calculate blood pressure from the PTT, an individualized calibration for each user needs to be created</span></span> <span class="pq pcite" data-src="Blood Pressure Calculation" data-pq="To calculate blood pressure from the PTT, an individualized calibration for each user needs to be created"></span></span></p>
   </div>
@@ -2291,9 +2287,7 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
       <div class="ro"><span>Phone place <i class="pdot ill" role="img" title="the input you give" aria-label="input"></i></span><b data-ro="place">sternum</b></div>
       <div class="ro est"><span>Interval, 30 s median <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="ival">&ndash;</b></div>
       <div class="ro est"><span>Start against AO <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="off">&ndash;</b></div>
-      <div class="ro est"><span>R, SCG timing <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="as the paper gives it">Seismo 0.55</i></span><b data-ro="rscg">&ndash;</b></div>
-      <div class="ro est"><span>R, ECG timing <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i> <i class="ppill" title="as the paper gives it">ECG + PPG, Lane et al. [12] 0.40 ± 0.35</i></span><b data-ro="recg">&ndash;</b></div>
-      <div class="ro est"><span>R, heart sound timing <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="rpcg">&ndash;</b></div>
+      <div class="ro est"><span>R with DBP, method picked <i class="pdot sim" role="img" title="simulated by the model" aria-label="simulated"></i></span><b data-ro="rpick">&ndash;</b></div>
     </div>
     <p class="result"><b>What you saw</b> <span class="more"><span data-ro="saw"></span><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">Each R is our study run with that method: 7 subjects, days 2 to 4 tested. The ECG spike and the S1 burst are drawn at the chain's times; their shapes are ours.</span></span><span class="rq" data-k="scg"><span class="rqt"><span class="pq" data-src="Discussion: Limitations">our average correlation between PTT and DBP is comparatively high at 0.55</span></span> <span class="pq pcite" data-src="Discussion: Limitations" data-pq="our average correlation between PTT and DBP is comparatively high at 0.55"></span></span><span class="rq" data-k="ecg"><span class="rqt"><span class="pq" data-src="Related Work: PTT vs PAT">systems using a combination of ECG and PPG to measure PTT are actually measuring Pulse Arrival Time (PAT=PEP+PTT) to estimate BP, by wrongly assuming PEP to be constant</span></span> <span class="pq pcite" data-src="Related Work: PTT vs PAT" data-pq="systems using a combination of ECG and PPG to measure PTT are actually measuring Pulse Arrival Time (PAT=PEP+PTT) to estimate BP, by wrongly assuming PEP to be constant"></span></span><span class="rq" data-k="pcg"><span class="rqt"><span class="pq" data-src="Related Work: Measuring BP using Smartphones">PCG does not provide the correct time to determine PTT, as PCG captures the closing of the valves sound, not the opening</span></span> <span class="pq pcite" data-src="Related Work: Measuring BP using Smartphones" data-pq="PCG does not provide the correct time to determine PTT, as PCG captures the closing of the valves sound, not the opening"></span></span></p>
   </div>
@@ -2372,7 +2366,7 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
     </div>
     <div class="only" data-only="1">
       <ol class="turns">
-        <li class="turn has wide" data-n="1" data-at="ctl:accNoise"><span class="n">1</span><span class="tsay"><b class="yt">Your turn</b> <span class="more">Raise the noise floor to 400&nbsp;µg/√Hz.<button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The BMI160 is 180&nbsp;µg/√Hz, 0.8&nbsp;mg in the SCG's band. SeismoWatch's ADXL354 is 20.</span></span></span><span class="tctl controls"><label class="slider"><span>Noise floor, µg/√Hz</span><input type="range" data-ctl="accNoise" min="20" max="400" step="10" value="180"><output data-val="accNoise" data-fmt="{v}">180</output></label></span></li>
+        <li class="turn has wide" data-n="1" data-at="ctl:accNoise"><span class="n">1</span><span class="tsay"><b class="yt">Your turn</b> <span class="more">Raise the noise floor to 400&nbsp;µg/√Hz.<button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The BMI160 is 180&nbsp;µg/√Hz. Over the SCG's band that comes to about 0.8&nbsp;mg: our number, not the paper's. SeismoWatch's ADXL354, a lab-grade, low-noise accelerometer, is 20&nbsp;µg/√Hz.</span></span></span><span class="tctl controls"><label class="slider"><span>Noise floor, µg/√Hz</span><input type="range" data-ctl="accNoise" min="20" max="400" step="10" value="180"><output data-val="accNoise" data-fmt="{v}">180</output></label></span></li>
         <li class="turn has wide" data-n="2" data-at="ctl:fsAcc"><span class="n">2</span><span class="tsay"><b class="yt">Your turn</b> <span class="more">Then sample at 2000&nbsp;Hz.<button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">A faster rate spreads the same noise floor over a wider band; the filter keeps only 0.8–20&nbsp;Hz, so little changes.</span></span></span><span class="tctl controls"><div class="choice" role="group" aria-label="Accelerometer rate"><span>Accelerometer rate</span><button type="button" class="pick" data-ctl="fsAcc" data-set="0" aria-pressed="true">400 Hz</button><button type="button" class="pick" data-ctl="fsAcc" data-set="1" aria-pressed="false">2000 Hz</button></div></span></li>
       </ol>
       <button type="button" class="allctl">Show all controls</button>
@@ -2404,13 +2398,13 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
   <div class="text">
     <div class="eyebrow set beyond">Go Beyond the Paper &middot; 3 of 3</div>
     <h2>Device design</h2>
-    <p class="ask"><b>Question</b> <span class="more">Where on the chest, and how quiet, must the one accelerometer be?<button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">Seismo reads the heart with the phone's own accelerometer. The paper tries two places and sets the BMI160's noise beside SeismoWatch's ADXL354, to explain a lost participant.</span></span></p>
-    <p class="why box"><span class="more"><b>Why it matters</b> Under the noise, the AO peak and the PTT are lost.<button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The colour is our assumed map: the AO's size at each place against the noise in the 0.8–20 Hz band. The paper measures only its two places.</span></span></p>
+    <p class="ask"><b>Question</b> <span class="more">Where, and how quiet, must the accelerometer be?<button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">Seismo reads the heart with the phone's own accelerometer. The paper tries two places and sets the BMI160's noise beside the ADXL354 (a lab-grade, low-noise accelerometer) that SeismoWatch uses, to explain a lost participant.</span></span></p>
+    <p class="why box"><span class="more"><b>Why it matters</b> Under the noise, AO is lost. The ADXL354 is a lab-grade, low-noise accelerometer.<button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The colour is our assumed map: the AO's size at each place against the noise in the 0.8–20 Hz band. The paper measures only its two places.</span></span></p>
     <dl class="fcw"><div class="fx"><dt>Fixed</dt><dd>the person at rest</dd></div><div class="ch"><dt>You change</dt><dd>place, noise, rate</dd></div><div class="wa"><dt>You watch</dt><dd>AO timing error</dd></div></dl>
     <ol class="turns">
       <li class="turn" data-n="1" data-at="panel:layout" data-by="panel:layout"><span class="n">1</span><span class="tsay"><b class="yt">Your turn</b> Drag the accelerometer away from the two places.</span></li>
       <li class="turn has" data-n="2" data-at="act:layout:clavicle"><span class="n">2</span><span class="tsay"><b class="yt">Your turn</b> Press</span><span class="tctl controls"><button type="button" class="btn preset" data-act="layout:clavicle">Below the clavicle</button></span><span class="more tmore"><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The paper's second place: above the pectoral muscles, below the clavicle.</span></span></li>
-      <li class="turn" data-n="3" data-at="ctl:accNoise"><span class="n">3</span><span class="tsay"><b class="yt">Your turn</b> Set the noise floor to 20 µg/√Hz, the ADXL354's.</span></li>
+      <li class="turn" data-n="3" data-at="ctl:accNoise"><span class="n">3</span><span class="tsay"><b class="yt">Your turn</b> Set the noise floor to 20 µg/√Hz: the ADXL354, a lab-grade, low-noise accelerometer.</span></li>
       <li class="turn has" data-n="4" data-at="act:layout:sternum"><span class="n">4</span><span class="tsay"><b class="yt">Your turn</b> Press</span><span class="tctl controls"><button type="button" class="btn preset" data-act="layout:sternum">On the sternum</button></span><span class="more tmore"><button type="button" class="tip" aria-label="More">i</button><span class="tipbox" role="tooltip">The paper's first place: below the pectoral muscles, on the sternum.</span></span></li>
     </ol>
     <button type="button" class="allctl">Show all controls</button>
@@ -2519,9 +2513,9 @@ a.ppill.kb:is(:hover, :focus-visible) { background: color-mix(in srgb, var(--mea
       <li class="abopen reveal" data-step="5">Click a part to open it.</li>
     </ol>
     <div class="abframe reveal" data-step="1"><span class="abname"><b>Sense2Sim</b>the whole system: it turns the paper into an interactive simulator</span></div>
-    <div class="abc reveal go" data-about="universe" data-step="2" style="left:545px;top:470px;width:310px;height:356px"><div class="abpv" data-live="exp-kg"></div><span class="abhead"><span class="abn">1</span><a class="abgo" href="https://claude.ai/artifact/NjkMBWE5DPpH644MBfZG6y" target="_blank" rel="noopener" aria-label="Open Sensing Universe">Open &#8599;</a></span><h3>Sensing Universe</h3><p>a knowledge base/graph of related ubiquitous sensing research</p></div>
-    <div class="abc reveal go" data-about="assets" data-step="3" style="left:940px;top:280px;width:330px;height:330px"><div class="abpv"><img src="about/assets.jpg" alt="" decoding="async"></div><span class="abhead"><span class="abn">2</span><a class="abgo" href="https://claude.ai/artifact/RLT2NHMnu2J2EpdaXQoR6z#en" target="_blank" rel="noopener" aria-label="Open Sensing 3D Assets">Open &#8599;</a></span><h3>Sensing 3D Assets</h3><p>reusable 3D models of devices, sensors, subjects, and objects</p></div>
-    <div class="abc reveal go" data-about="world" data-step="4" style="left:940px;top:686px;width:330px;height:330px"><div class="abpv" data-live="exp-world"></div><span class="abhead"><span class="abn">3</span><a class="abgo" href="https://claude.ai/artifact/SPCMbPA1EA8zLtrC38EaE2" target="_blank" rel="noopener" aria-label="Open Sensing World">Open &#8599;</a></span><h3>Sensing World</h3><p>3D scenes of the places where sensing is used</p></div>
+    <div class="abc reveal go" data-about="universe" data-step="2" style="left:545px;top:470px;width:310px;height:356px"><div class="abpv" data-live="exp-kg"></div><span class="abhead"><span class="abn">1</span><a class="abgo" href="https://ambient-intelligence-lab-umich-eecs.github.io/Sense2Sim_Universe/pages/universe/index.html" target="_blank" rel="noopener" aria-label="Open Sensing Universe">Open &#8599;</a></span><h3>Sensing Universe</h3><p>a knowledge base/graph of related ubiquitous sensing research</p></div>
+    <div class="abc reveal go" data-about="assets" data-step="3" style="left:940px;top:280px;width:330px;height:330px"><div class="abpv"><img src="about/assets.jpg" alt="" decoding="async"></div><span class="abhead"><span class="abn">2</span><a class="abgo" href="https://ambient-intelligence-lab-umich-eecs.github.io/Sense2Sim_Assets/" target="_blank" rel="noopener" aria-label="Open Sensing 3D Assets">Open &#8599;</a></span><h3>Sensing 3D Assets</h3><p>reusable 3D models of devices, sensors, subjects, and objects</p></div>
+    <div class="abc reveal go" data-about="world" data-step="4" style="left:940px;top:686px;width:330px;height:330px"><div class="abpv" data-live="exp-world"></div><span class="abhead"><span class="abn">3</span><a class="abgo" href="https://ambient-intelligence-lab-umich-eecs.github.io/Sense2Sim_Universe/pages/world/index.html#home" target="_blank" rel="noopener" aria-label="Open Sensing World">Open &#8599;</a></span><h3>Sensing World</h3><p>3D scenes of the places where sensing is used</p></div>
     <div class="abc reveal sim go" data-about="sim" data-step="5" style="left:1355px;top:498px;width:430px;height:300px"><span class="abhead"><span class="abn">4</span><a class="abgo" href="#title" aria-label="Open Physical Interactive Simulator of Specific Research">Open &rsaquo;</a></span><h3>Physical Interactive Simulator of Specific Research</h3><p>this deck: the paper as a model to try</p></div>
     <svg class="ablines" viewBox="0 0 1920 1080" width="1920" height="1080" aria-hidden="true"><g data-step="1"><path d="M472 275 L 514 275" pathLength="1"/><polygon points="520,275 506,267 506,283"/></g><g data-step="3"><path d="M857 568 C 897 568, 897 445, 934 445" pathLength="1"/><polygon points="940,445 926,437 926,453"/></g><g data-step="4"><path d="M857 728 C 897 728, 897 851, 934 851" pathLength="1"/><polygon points="940,851 926,843 926,859"/></g><g data-step="5"><path d="M857 648 L 1091 648 M 1119 648 L 1349 648" pathLength="1"/><polygon points="1355,648 1341,640 1341,656"/></g><g data-step="4"><path d="M1105 612 L 1105 680" pathLength="1"/><polygon points="1105,686 1097,672 1113,672"/></g><g data-step="5"><path d="M1272 445 C 1312 445, 1312 578, 1349 578" pathLength="1"/><polygon points="1355,578 1341,570 1341,586"/></g><g data-step="5"><path d="M1272 851 C 1312 851, 1312 718, 1349 718" pathLength="1"/><polygon points="1355,718 1341,710 1341,726"/></g></svg>
   </div>
@@ -5211,10 +5205,12 @@ function cableBlock(opts = {}) {
   };
 }
 // ================================================================ the scene part's own blocks (Seismo)
-// Fig. 1 of the paper: a seated person presses the phone flat on the left of the chest, its screen to the front showing
-// the SCG and the PPG, and lays an index finger of the other hand over the back camera and the flash under the phone's
-// top end. The person is the library's body (figureBlock, HUM-adult), the phone the library's smartphone (P02), the
-// finger the library's right hand and forearm (pointerBlock, HUM-hand_right) drawn mirrored as the left. What the
+// The official pose (the project photo and the paper's Fig. 1): a seated person holds the phone nearly level against the
+// chest, its screen up showing the SCG and the PPG, its bottom end on the chest at the right of the sternum, its top end
+// forward; the RIGHT hand holds the far end, the index fingertip under it over the back camera and the flash (lit red),
+// the thumb on the screen's side; the LEFT hand's fingers support it from below near the chest. The person is the
+// library's body (figureBlock, HUM-adult: its left hand is the body's own), the phone the library's smartphone (P02), the
+// right hand the library's right hand and forearm (pointerBlock, HUM-hand_right). What the
 // library holds no model of is drawn here, small and marked with its id (markPart): the accelerometer (inside the
 // phone; a chip and its y-axis arrow, `Seismo` p. 3), the camera and the flash (markers at the lens), the speaker and
 // the microphone (marked at the foot of the screen's bezel, `Synchronization`), and the arm cuff of the evaluation
@@ -5224,8 +5220,9 @@ function cableBlock(opts = {}) {
 // The blocks, in the order scene/scene.js builds them:
 //   seisControlBlock()   first: the scene's state keys, and a sceneSet(st) called without the frame's state merged in
 //   seisPhoneBlock()     the phone on the chest (or flat on the table for the beeps), its parts marked
-//   seisArmsBlock()      after the figure and the pointer: the right hand holds the phone's bottom end, the left
-//                        index finger on the lens (its forearm the library hand's, its upper arm the body's)
+//   seisArmsBlock()      after the figure and the pointer: the right hand holds the phone's far end, its index under it
+//                        on the lens and the flash, its thumb on the screen's side (the library hand's, its arm the
+//                        body's, the wrist bent onto it); the left hand under the chest end, palm up (the body's own)
 //   seisCuffBlock()      the arm cuff on the left upper arm (rig: demo, sim-real)
 //   seisWordsBlock()     last: the labels (`lab:` keys), each with a leader line to its thing, and the press's words
 // Each reads SEIS (scene/scene.js fills its geometry: the chest's skin, the views, the places).
@@ -5235,9 +5232,10 @@ const SEIS = {
   fig: null, geo: null, pose: null, tip: null, arm: null, curAt: null, wasOn: false,
 };
 // the phone: Google Pixel (`Seismo` p. 3), 14.4 × 7.0 × 0.85 cm (the Pixel's own size, assumed: the paper gives none),
-// flat on the left chest, its length across the chest toward the person's left, rising `turn`° (as Fig. 1 holds it;
-// `Seismo` p. 3: “press it onto the left side of the chest”); the press (0–100 %) sets how far it is pushed in
-const SEIS_PHONE = { len: 14.4, hw: 3.5, th: 0.85, turn: 18, chip: [0.9, 5.4], lens: null, flash: null };
+// held nearly level against the chest, its screen up, its bottom end on the chest just right of the sternum (seisPose: yaw,
+// pitch, roll, degrees; side, cm: the bottom edge's centre to the person's right of the contact; `turn` is kept for the
+// pages part's own phone over the heart); the press (0–100 %) pushes it in
+const SEIS_PHONE = { len: 14.4, hw: 3.5, th: 0.85, turn: 18, yaw: 25, pitch: 14, roll: -4, side: 8, up: -4.4, chip: [0.9, 9.6], lens: null, flash: null };
 const seisV = (a) => new THREE.Vector3(...a);
 const seisMat = (tok, o = {}) => { const m = new THREE.MeshStandardMaterial({ color: C3D[tok], roughness: 0.45, metalness: 0.05, transparent: true, ...o }); m.userData.tok = tok; return m; };
 
@@ -5305,7 +5303,7 @@ function seisPhoneBlock() {
       // their labels are tall; assumed: the Pixel's are on its bottom edge, under them)
       const SW = 256, SH = 512, foot = 80; // the screen's canvas and its bezel's foot, px
       const local = (px, py) => new THREE.Vector3((px / SW - 0.5) * (SEIS_PHONE.hw * 2 - 0.25), SEIS_PHONE.len / 2 + (0.5 - py / SH) * (SEIS_PHONE.len - 0.3), SEIS_PHONE.th / 2 + 0.06);
-      const MIC = [58, SH - foot / 2], SPK = [176, SH - foot / 2];
+      const MIC = [40, SH - foot / 2 + 12], SPK = [196, SH - foot / 2 + 12];
       const spkM = mark("speaker", local(...SPK)), micM = mark("mic", local(...MIC));
       // the accelerometer: a chip (BMI160, 2.5 × 3 mm; drawn 2 cm so it can be seen) over the screen, above where it sits
       // inside (assumed), and its y-axis arrow along the phone's height; in the flat set-up the z-axis arrow out of the
@@ -5327,10 +5325,16 @@ function seisPhoneBlock() {
       wave(390, 60, "#d4452c", (u) => { const k = (u * 3 + 0.8) % 1; return k < 0.15 ? k / 0.15 : Math.exp(-(k - 0.15) * 3.2); });
       // the speaker's grille (right: a plate of holes) and the microphone's hole (left: a ringed hole) in the bezel's foot
       const rr = (x, y, w, h, r) => { cg.beginPath(); cg.moveTo(x + r, y); cg.arcTo(x + w, y, x + w, y + h, r); cg.arcTo(x + w, y + h, x, y + h, r); cg.arcTo(x, y + h, x, y, r); cg.arcTo(x, y, x + w, y, r); cg.closePath(); };
-      cg.fillStyle = "#c9cfd6"; rr(SPK[0] - 58, SPK[1] - 30, 116, 60, 14); cg.fill();
-      cg.fillStyle = "#121417"; for (let i = -4; i <= 4; i++) for (let j = -1; j <= 1; j++) { cg.beginPath(); cg.arc(SPK[0] + i * 12, SPK[1] + j * 16, 3.6, 0, 7); cg.fill(); }
-      cg.fillStyle = "#c9cfd6"; cg.beginPath(); cg.arc(MIC[0], MIC[1], 32, 0, 7); cg.fill();
-      cg.fillStyle = "#121417"; cg.beginPath(); cg.arc(MIC[0], MIC[1], 18, 0, 7); cg.fill();
+      // (the bottom end, on the chest: the on-screen buttons' bar, as the photo's; the speaker's slot and the mic's hole
+      // small beside them. The top end, away from the chest: the front camera and the earpiece, so the far end reads as
+      // the camera's end)
+      cg.fillStyle = "#f3f5f7"; cg.fillRect(12, SH - foot, 232, 30); cg.fillStyle = "#121417";
+      { const y = SH - foot + 15; cg.beginPath(); cg.moveTo(70, y); cg.lineTo(82, y - 8); cg.lineTo(82, y + 8); cg.closePath(); cg.fill(); cg.beginPath(); cg.arc(128, y, 7, 0, 7); cg.fill(); cg.fillRect(170, y - 7, 14, 14); }
+      cg.fillStyle = "#3a3f46"; rr(SW / 2 - 30, 18, 60, 9, 4); cg.fill(); cg.fillStyle = "#5a6068"; cg.beginPath(); cg.arc(SW / 2 + 62, 24, 9, 0, 7); cg.fill();
+      cg.fillStyle = "#c9cfd6"; rr(SPK[0] - 40, SPK[1] - 8, 80, 22, 8); cg.fill();
+      cg.fillStyle = "#121417"; for (let i = -4; i <= 4; i++) { cg.beginPath(); cg.arc(SPK[0] + i * 8, SPK[1] + 3, 2.6, 0, 7); cg.fill(); }
+      cg.fillStyle = "#c9cfd6"; cg.beginPath(); cg.arc(MIC[0], MIC[1] + 3, 12, 0, 7); cg.fill();
+      cg.fillStyle = "#121417"; cg.beginPath(); cg.arc(MIC[0], MIC[1] + 3, 6, 0, 7); cg.fill();
       const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
       const scrMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false });
       const scr = new THREE.Mesh(new THREE.PlaneGeometry(SEIS_PHONE.hw * 2 - 0.25, SEIS_PHONE.len - 0.3), scrMat);
@@ -5373,7 +5377,7 @@ function seisPhoneBlock() {
       const lensF = inFront(SEIS_PHONE.lens), flashF = inFront(SEIS_PHONE.flash), midF = lensF.clone().add(flashF).multiplyScalar(0.5);
       const lit = flat ? 0 : a * (S.finger ?? 0) * (S.person ?? 0);
       // (the glow where the light leaks out round the fingertip: just past the phone's top end, at the camera's side)
-      const leak = P.g.localToWorld(new THREE.Vector3(SEIS_PHONE.lens.x, SEIS_PHONE.len + 0.5, 0));
+      const leak = P.g.localToWorld(new THREE.Vector3(SEIS_PHONE.lens.x, SEIS_PHONE.len + 0.2, -SEIS_PHONE.th / 2 - 0.7)); // (under the far end, at the back: the lit pad under the camera)
       P.flashGlow.position.copy(leak); P.flashGlow.material.opacity = lit * (0.8 + 0.1 * Math.sin(time * 5));
       P.tipCore.position.copy(leak); P.tipCore.material.opacity = lit * 0.9;
       pose.lens = P.camM.getWorldPosition(new THREE.Vector3()); pose.flash = P.flashM.getWorldPosition(new THREE.Vector3());
@@ -5384,46 +5388,45 @@ function seisPhoneBlock() {
 }
 
 // the phone's frame at a contact on the chest (or flat): O its bottom edge's centre, X across, L along its height (the
-// accelerometer's y-axis), N out of its screen. On the chest (Fig. 1; `Seismo` p. 3: “press it onto the left side of
-// the chest”): the phone lies flat on the left chest, its back on the skin and its screen to the front, its length
-// across the chest toward the person's left and rising SEIS_PHONE.turn° (as Fig. 1 holds it), the accelerometer's chip
-// over the contact. Its back is the plane that touches the skin under it at its outermost point, pushed in by the press;
-// its top end, where the back camera is, stands just far enough off the chest's curve for the fingertip under it
+// accelerometer's y-axis), N out of its screen. On the chest (the official pose: the project photo and Fig. 1, video 1
+// at 0:11–0:25, video 2's “Place right side bottom of the phone on the chest and right hand index on camera”; `Seismo`
+// p. 3): the phone held nearly level, its screen up and tilted a little toward the person (its top end raised
+// SEIS_PHONE.pitch°), its length pointing forward away from the chest and a little across (SEIS_PHONE.yaw°, less than 0
+// toward the person's right, where the right hand holds its far end), rolled SEIS_PHONE.roll° so its screen leans
+// toward the views' side (the person's right), its bottom end on the chest at the right of the contact. The edge is moved in
+// along the phone until no point of its back or its bottom end is under the skin, then pushed in by the press (5 mm at
+// most, drawn: the soft tissue). X is the phone's own right (the person's right), where the back camera is (lens.x > 0)
 function seisPose(at, flat, press = 100) {
   if (flat) {
     const c = seisV(SEIS.geo ? SEIS.geo.flatAt : [60, -80, 40]), L = new THREE.Vector3(-0.45, 0, -0.89).normalize(), N = new THREE.Vector3(0, 1, 0);
     const X = L.clone().cross(N), O = c.clone().addScaledVector(L, -SEIS_PHONE.len / 2).addScaledVector(N, SEIS_PHONE.th / 2);
     return { O, X, L, N, C: c, n: N.clone(), flat: true };
   }
-  const sk = seisSkin(at[0], at[1]), C0 = seisV(sk.p);
-  const a = (SEIS_PHONE.turn * Math.PI) / 180, d2 = [Math.cos(a), Math.sin(a)], x2 = [Math.sin(a), -Math.cos(a)];
-  const len = SEIS_PHONE.len, hw = SEIS_PHONE.hw, ch = SEIS_PHONE.chip;
-  // the bottom edge's centre in the chest's plane: the chip over the contact
-  const b2 = [at[0] - d2[0] * ch[1] - x2[0] * ch[0], at[1] - d2[1] * ch[1] - x2[1] * ch[0]];
-  const in2 = (s, w) => [b2[0] + d2[0] * s + x2[0] * w, b2[1] + d2[1] * s + x2[1] * w];
-  const under = [];
-  for (let i = 0; i <= 6; i++) for (const w of [-hw, 0, hw]) { const q = in2((len * i) / 6, w), k = seisSkin(q[0], q[1]); under.push({ p: seisV(k.p), n: seisV(k.n) }); }
-  // the back's plane: the skin's mean normal under the phone; the long axis laid in it
-  const N0 = new THREE.Vector3(); for (const u of under) N0.add(u.n); N0.normalize();
-  if (N0.z < 0.3) N0.set(0, 0, 1);
-  const L0 = new THREE.Vector3(d2[0], d2[1], 0); L0.addScaledVector(N0, -L0.dot(N0)).normalize();
-  let dOut = -Infinity; for (const u of under) dOut = Math.max(dOut, u.p.dot(N0));
-  dOut -= 0.5 * Math.min(1, Math.max(0, press / 100)); // the press: the phone pushed into the soft tissue (5 mm at most, drawn)
-  const z = (dOut + SEIS_PHONE.th / 2 - b2[0] * N0.x - b2[1] * N0.y) / N0.z, Ob = new THREE.Vector3(b2[0], b2[1], z);
-  // the top end lifted about the bottom edge (6° at most: the phone stays flat on the chest, as Fig. 1 presses it) until
-  // the camera's place stands 1 cm off the skin (the fingertip's room, the soft tissue pressed under it)
-  const lens = SEIS_PHONE.lens || new THREE.Vector3(-1.9, len - 1.5, -SEIS_PHONE.th / 2);
-  let L = L0, N = N0, X = L0.clone().cross(N0).normalize();
-  for (let deg = 0; deg <= 6; deg += 1) {
-    const t = (deg * Math.PI) / 180;
-    L = L0.clone().multiplyScalar(Math.cos(t)).addScaledVector(N0, Math.sin(t)).normalize();
-    N = N0.clone().multiplyScalar(Math.cos(t)).addScaledVector(L0, -Math.sin(t)).normalize();
-    X = L.clone().cross(N).normalize();
-    const lw = Ob.clone().addScaledVector(X, lens.x).addScaledVector(L, lens.y).addScaledVector(N, -SEIS_PHONE.th / 2);
-    const s = seisSkin(lw.x, lw.y);
-    if ((lw.z - s.p[2]) * N0.z >= 1.0) break;
+  // (the bottom end at chest height, SEIS_PHONE.up cm above the place the chain reads, as the photo holds it: not the belly)
+  const sk = seisSkin(at[0], at[1] + SEIS_PHONE.up), C0 = seisV(sk.p), n0 = seisV(sk.n).normalize();
+  const rad = Math.PI / 180, ya = SEIS_PHONE.yaw * rad, pi = SEIS_PHONE.pitch * rad, ro = SEIS_PHONE.roll * rad;
+  const len = SEIS_PHONE.len, hw = SEIS_PHONE.hw, th = SEIS_PHONE.th;
+  const L = new THREE.Vector3(Math.sin(ya) * Math.cos(pi), Math.sin(pi), Math.cos(ya) * Math.cos(pi)).normalize();
+  let N = new THREE.Vector3(-Math.sin(ya) * Math.sin(pi), Math.cos(pi), -Math.cos(ya) * Math.sin(pi)).normalize();
+  let X = L.clone().cross(N).normalize();
+  // the roll about L: the screen leaned toward the person's right (+X, roll < 0), the side the views look from
+  N = N.clone().multiplyScalar(Math.cos(ro)).addScaledVector(X, -Math.sin(ro)).normalize(); X = L.clone().cross(N).normalize();
+  // the bottom edge's centre SEIS_PHONE.side cm to the person's right of the contact (the project photo: the bottom end
+  // on the chest at the right of the sternum)
+  let O = C0.clone().addScaledVector(X, SEIS_PHONE.side);
+  // in along L until the phone just touches: the most any point of its back half and its bottom end is under the skin
+  const pts = [];
+  for (const s of [0, 0.4, 1, 2, 3.5, 5, 7]) for (let w = -hw; w <= hw + 1e-6; w += hw / 3) for (const k of [-th / 2, 0, th / 2]) pts.push([w, s, k]);
+  for (let it = 0; it < 4; it++) {
+    let worst = -Infinity;
+    for (const [w, s, k] of pts) {
+      const q = O.clone().addScaledVector(X, w).addScaledVector(L, s).addScaledVector(N, k), sq = seisSkin(q.x, q.y);
+      worst = Math.max(worst, (sq.p[2] - q.z) * Math.max(0.3, n0.z));
+    }
+    O.addScaledVector(L, worst / Math.max(0.3, L.z));
   }
-  return { O: Ob, X, L, N, C: C0, n: N0.clone(), flat: false };
+  O.addScaledVector(L, -0.9 - 0.5 * Math.min(1, Math.max(0, press / 100))); // resting on the chest: 0.9 cm into the shirt and skin (kit85f: so its bottom end's screen-side edge touches too, no gap seen), then the press: pushed into the soft tissue
+  return { O, X, L, N, C: C0, n: n0, flat: false };
 }
 // the chest's skin at (x, y) of the drag plane: the three nearest of the grid scene/scene.js samples (figureBlock's
 // surface), weighted by nearness
@@ -5449,14 +5452,23 @@ function seisIk(S, T, a, b, pole) {
   return S.clone().addScaledVector(u, a * cosA).addScaledVector(v, a * sinA);
 }
 
-// ---- the arms (Fig. 1; `Seismo` p. 3: “hold the phone in one hand, and press it onto the left side of the chest. Then
-// they place their index finger of the other hand over the phone's back camera, covering both the camera and flash”):
-// the right hand holds the phone's bottom end on the chest; the left hand comes up under its top end at the person's
-// left, as Fig. 1 shows it, the index finger under the phone on the camera and the flash. The finger is the library's
-// right hand and forearm (pointerBlock, its origin the index fingertip, +y along the finger, +x the back of the hand)
-// drawn mirrored as a left hand; the body's own left forearm is folded away into its elbow while the finger is shown,
-// and its upper arm aimed at the library forearm's elbow, found by turning the hand about the lens until the elbow is
-// one upper arm from the shoulder, below it and to the body's side
+// ---- the arms (the official pose: the project photo and Fig. 1; video 1 at 0:11–0:25; video 2: “Place right side
+// bottom of the phone on the chest and right hand index on camera”; `Seismo` p. 3: “covering both the camera and
+// flash”). The RIGHT hand holds the phone's far end: its index under the phone, the pad up on the back camera and the
+// flash (lit red), its thumb over the top edge onto the screen's side. The LEFT hand's fingers support the phone from
+// below near its chest end, the palm up.
+// The right hand is the library's right hand and forearm (pointerBlock, HUM-hand_right: its origin the index fingertip,
+// +y along the finger, palm −x, thumb +z), its thumb posed open and bent over the edge (SEIS_THUMB); the body's own right
+// hand is folded away into its wrist while the finger is shown (its forearm laid along the library one), and its upper
+// arm aimed at the library forearm's elbow, found by turning the hand about the lens (its pointing in the back's plane,
+// from across the phone toward its left edge to a little toward its top end, and its tilt under the phone) until the
+// elbow is one upper arm from the right shoulder, below it, at the body's right side and in front of the chest.
+// The left hand is the library body's own (HUM-adult's hand_l): its arm reaches by two bones (seisIk) to the wrist, the
+// hand then turned so its palm faces the phone's back, its fingers toward the phone's right edge and a little forward,
+// its thumb toward the far end. Without the finger (a step that hides it), the body's own right hand holds the phone's
+// right edge, the left hand as before.
+const SEIS_THUMB = [0.25, 0.55, 0.55]; // the right thumb's three joints, radians toward the palm (where no better is found)
+const SEIS_INDEX = [0.5, 0.7, 0.4]; // the right index's three joints bent toward the palm: its pad up under the lens
 function seisArmsBlock() {
   return {
     build(W) {
@@ -5466,67 +5478,218 @@ function seisArmsBlock() {
       const wp = (b) => b.getWorldPosition(new THREE.Vector3());
       B.g.updateMatrixWorld(true);
       const len = (p, c) => { const a = bones(p)[0], b = bones(c)[0]; return a && b ? wp(a).distanceTo(wp(b)) : 24; };
-      const A = { B, bones, wp, upR: len("upperarm_r", "lowerarm_r"), foreR: len("lowerarm_r", "hand_r"), upL: len("upperarm_l", "lowerarm_l"), e: null, wr: null };
+      const A = { B, bones, wp, upR: len("upperarm_r", "lowerarm_r"), foreR: len("lowerarm_r", "hand_r"), upL: len("upperarm_l", "lowerarm_l"), foreL: len("lowerarm_l", "hand_l"), handL: len("hand_l", "middle_01_l"), e: null, wr: null };
       if (W.finger && W.pointerLib && W.pointerLib.lib) {
         W.finger.position.set(0, 0, 0); W.finger.rotation.set(0, 0, 0); W.finger.scale.set(1, 1, 1); W.finger.updateMatrixWorld(true);
+        // the index bent (SEIS_INDEX: its pad up under the camera, as in the photo), then the fingertip's place and its
+        // pad's way in the finger's frame: the last joint's head, 2 cm on along it, the pad on the palm's side square to it
+        try {
+          const lib = W.pointerLib.lib, cs = Object.values(lib.copies), i2 = lib.bones("index_02_r")[0], i3 = lib.bones("index_03_r")[0], tb = lib.bones("thumb_03_r")[0];
+          for (const h of cs) poseHand(lib.group, (n) => h.getObjectByName(n), { index: SEIS_INDEX });
+          W.finger.updateMatrixWorld(true);
+          const h2 = W.finger.worldToLocal(wp(i2)), h3 = W.finger.worldToLocal(wp(i3)), d3 = h3.clone().sub(h2).normalize();
+          A.tip = h3.clone().addScaledVector(d3, 2.0);
+          { const z = new THREE.Vector3(0, 0, 1).addScaledVector(d3, -d3.z).normalize(); A.pad = z.cross(d3).normalize(); } // (+z × d3: −x on a straight finger, turned with the bend)
+          A.d3 = d3;
+          // the thumb: its three joints chosen (a search over their bends) so that its last joint lies over the screen,
+          // the phone's thickness and two pads past the index's pad, 3 cm back from the fingertip toward the knuckles and
+          // out to the thumb's side: the phone pinched between the thumb and the index
+          const want = A.tip.clone().addScaledVector(A.pad, SEIS_PHONE.th + 2.0).addScaledVector(d3, -3).add(new THREE.Vector3(0, 0, 1.5));
+          const put = (t) => { for (const h of cs) poseHand(lib.group, (n) => h.getObjectByName(n), { thumb: t }); W.finger.updateMatrixWorld(true); };
+          let bestT = SEIS_THUMB, bestD = Infinity;
+          if (tb) for (let a = -0.6; a <= 1.21; a += 0.3) for (let b = -0.3; b <= 1.21; b += 0.3) for (let c = 0; c <= 1.01; c += 0.25) {
+            put([a, b, c]); const d = W.finger.worldToLocal(wp(tb)).distanceTo(want);
+            if (d < bestD) { bestD = d; bestT = [a, b, c]; }
+          }
+          put(bestT); A.thumbPose = bestT;
+        } catch (e) { console.warn("Seismo: the index's and the thumb's pose:", e.message); A.tip = null; }
         const eb = W.pointerLib.lib.bones("lowerarm_r")[0], hb = W.pointerLib.lib.bones("hand_r")[0];
         A.e = eb ? W.finger.worldToLocal(wp(eb)) : new THREE.Vector3(0, -26, -2);
         A.wr = hb ? W.finger.worldToLocal(wp(hb)) : new THREE.Vector3(0, -9, -1);
+        // the curled fingers' last joints and the thumb's, in the finger's frame: kept under the phone's back (the
+        // curled ones) and over its screen (the thumb) by the search below
+        A.curl = ["middle_03_r", "ring_03_r", "pinky_03_r", "middle_02_r", "ring_02_r"].map((n) => W.pointerLib.lib.bones(n)[0]).filter(Boolean).map((b) => W.finger.worldToLocal(wp(b)));
+        { const tb = W.pointerLib.lib.bones("thumb_03_r")[0]; A.thumb = tb ? W.finger.worldToLocal(wp(tb)) : null; }
       }
+      // the left thumb laid along the palm's edge, under the phone (the body's own sits up from its hand); a left hand's
+      // joints bent as a right hand's would be
+      try { for (const c of copies) poseHand(B.g, (n) => c.getObjectByName(n.replace(/_r$/, "_l")), { thumb: SEIS_LEFT.thumb }); } catch (e) { console.warn("Seismo: the left thumb:", e.message); }
       return { seisArms: A };
     },
     apply(S, W) {
       const A = W.seisArms; if (!A) return;
       const P = SEIS.pose, on = !!P && !P.flat && (S.seis ?? 0) > 0.5 && (S.seisPhone ?? 1) > 0.5 && (S.person ?? 0) > 0.5, fingerOn = on && (S.finger ?? 0) > 0.5 && !!A.e;
-      for (const b of A.bones("lowerarm_l")) b.scale.setScalar(fingerOn ? 0.001 : 1);
+      // (the body's right forearm is kept and laid along the library forearm, from the body's elbow to the library
+      // hand's wrist, so no gap shows at the elbow; the body's own right hand is folded into its wrist)
       for (const b of A.bones("lowerarm_r")) b.scale.setScalar(1);
-      if (W.finger) W.finger.scale.set(fingerOn ? -1 : 1, 1, 1);
+      for (const b of A.bones("hand_r")) b.scale.setScalar(fingerOn ? 0.001 : 1);
+      for (const b of A.bones("lowerarm_l")) b.scale.setScalar(1);
+      if (W.finger) W.finger.scale.set(1, 1, 1);
       if (!on) { if (SEIS.wasOn) A.B.last = "again"; SEIS.wasOn = false; SEIS.arm = null; return; } // the figure poses itself again (its own sit)
       SEIS.wasOn = true;
       A.B.g.updateMatrixWorld(true);
       const aim = (n, d) => { for (const b of A.bones(n)) figureAim(b, d.clone().normalize()); };
-      // the right hand: under the phone's bottom end, its fingers up across the back (clear of the screen and the chip)
-      const Sr = A.wp(A.bones("upperarm_r")[0]);
-      const hd = P.X.clone().multiplyScalar(-0.85).addScaledVector(P.L, 0.25).addScaledVector(P.N, -0.35).normalize();
-      const G = P.O.clone().addScaledVector(P.L, 1.2).addScaledVector(P.X, SEIS_PHONE.hw + 1.4).addScaledVector(P.N, -1.8);
-      const Wt = G.clone().addScaledVector(hd, -6.5);
-      const Er = seisIk(Sr, Wt, A.upR, A.foreR, new THREE.Vector3(-0.6, -1, 0.1));
-      aim("upperarm_r", Er.clone().sub(Sr)); aim("lowerarm_r", Wt.clone().sub(Er)); aim("hand_r", hd);
-      // the left index finger under the top end, on the lens: search the hand's turn about the lens (in the back's
-      // plane, from pointing back along the phone to pointing up across it) and its tilt off the back, for the elbow one
-      // upper arm from the left shoulder, below it and not across the body
-      const Sl = A.wp(A.bones("upperarm_l")[0]);
-      if (!fingerOn) { SEIS.arm = null; return; }
-      const lens = P.lens || P.O.clone().addScaledVector(P.L, SEIS_PHONE.len - 1.5), back = P.N.clone().negate();
+      const Sr = A.wp(A.bones("upperarm_r")[0]), back = P.N.clone().negate();
       const top = P.O.clone().addScaledVector(P.L, SEIS_PHONE.len);
-      let best = null;
-      for (let bd = -10; bd <= 80; bd += 5) for (let gd = 0; gd <= 45; gd += 5) {
-        const b = (bd * Math.PI) / 180, gm = (gd * Math.PI) / 180;
-        const F = P.L.clone().negate().multiplyScalar(Math.cos(b)).addScaledVector(P.X, -Math.sin(b)).normalize();
-        const Fg = F.clone().multiplyScalar(Math.cos(gm)).addScaledVector(P.N, -Math.sin(gm)).normalize();
-        const T = lens.clone().addScaledVector(Fg, 0.6).addScaledVector(back, 0.95);
-        // the pad toward the phone's back: the back of the hand toward the chest (mirrored: +x local is −Xw)
-        const Xw = back.clone().addScaledVector(Fg, -back.dot(Fg)).normalize().negate(), Zw = Xw.clone().cross(Fg);
-        const R = new THREE.Matrix4().makeBasis(Xw, Fg, Zw), E = A.e.clone().multiply(new THREE.Vector3(-1, 1, 1)).applyMatrix4(R).add(T);
-        const Wr = A.wr.clone().multiply(new THREE.Vector3(-1, 1, 1)).applyMatrix4(R).add(T);
-        const reach = Math.abs(E.distanceTo(Sl) - A.upL), high = Math.max(0, E.y - Sl.y + 16), across = Math.max(0, Sl.x - 10 - E.x), wide = Math.max(0, E.x - Sl.x - 6);
-        // the wrist clear of the phone (beyond its top end or under its lower edge) and of the chest (in front of it)
-        const wl = Wr.clone().sub(P.O), alongW = wl.dot(P.L), acrossW = wl.dot(P.X), outW = Wr.clone().sub(P.C).dot(P.n);
-        const inside = alongW < SEIS_PHONE.len + 1 && acrossW < SEIS_PHONE.hw + 1 ? 6 : 0, deep = Math.max(0, 1.5 - outW);
-        const score = reach + 0.6 * high + 0.4 * across + 0.4 * wide + inside + deep + 0.03 * gd + 0.04 * Math.abs(bd - 55);
-        if (!best || score < best.score) best = { score, T, R, E, Fg };
+      seisLeftHand(A, P, aim);
+      if (!fingerOn) {
+        // the finger hidden (a step without it): the right arm rests (the figure's own sit, posed again next frame), the
+        // left hand alone under the chest end
+        A.B.last = "again"; SEIS.arm = null; return;
+        // (not reached: the body's own right hand on the phone's right edge, its fingers under the back)
+        const hd = P.X.clone().negate().addScaledVector(P.N, -0.3).normalize();
+        const G = P.O.clone().addScaledVector(P.L, SEIS_PHONE.len * 0.62).addScaledVector(P.X, SEIS_PHONE.hw + 1.0).addScaledVector(P.N, -1.2);
+        const Wt = G.clone().addScaledVector(hd, -6.5);
+        const Er = seisIk(Sr, Wt, A.upR, A.foreR, new THREE.Vector3(-0.7, -1, -0.1));
+        aim("upperarm_r", Er.clone().sub(Sr)); A.B.g.updateMatrixWorld(true); aim("lowerarm_r", Wt.clone().sub(A.wp(A.bones("lowerarm_r")[0]))); A.B.g.updateMatrixWorld(true);
+        // (palm up against the back, the thumb toward the top end)
+        seisHandTo(A, "r", hd, P.L, P.N);
+        SEIS.arm = null; return;
       }
+      // the right index under the far end, on the lens and the flash: search the finger's way in the back's plane (from
+      // pointing across the phone toward its left edge, −X, to a little toward its top end) and its tilt up to the back
+      // from under it, for the elbow one upper arm from the right shoulder, below it, at the body's right
+      const lens = P.lens || P.O.clone().addScaledVector(P.L, SEIS_PHONE.len - 1.5), flash = P.flash || lens;
+      const pad = lens.clone().lerp(flash, 0.35);
+      let best = null;
+      for (let bd = -40; bd <= 40; bd += 5) for (let gd = -30; gd <= 80; gd += 10) { // (pose-final: the hand come in from the phone's right edge at its far end, as the photo holds it)
+        const b = (bd * Math.PI) / 180, gm = (gd * Math.PI) / 180;
+        // bd 0: the finger points to the phone's left (−X), the hand come in from its right edge; 90 would be along it toward the top end
+        const F = P.X.clone().negate().multiplyScalar(Math.cos(b)).addScaledVector(P.L, Math.sin(b)).normalize();
+        let R, T;
+        if (A.tip) {
+          // the bent index: its last joint (d3) along F tilted gm up toward the back, its pad (square to it, toward the
+          // palm) facing the back; the fingertip's pad on the lens
+          const dw = F.clone().multiplyScalar(Math.cos(gm)).addScaledVector(P.N, Math.sin(gm)).normalize(), pw = P.N.clone().addScaledVector(dw, -P.N.dot(dw)).normalize();
+          const Ml = new THREE.Matrix4().makeBasis(A.d3, A.pad, A.d3.clone().cross(A.pad)), Mw = new THREE.Matrix4().makeBasis(dw, pw, dw.clone().cross(pw));
+          R = Mw.multiply(Ml.transpose());
+          const tipW = pad.clone().addScaledVector(back, SEIS_PHONE.th / 2 + 0.72);
+          T = tipW.sub(A.tip.clone().applyMatrix4(R));
+        } else {
+          const Fg = F.clone().multiplyScalar(Math.cos(gm)).addScaledVector(P.N, Math.sin(gm)).normalize();
+          T = pad.clone().addScaledVector(Fg, 0.5).addScaledVector(back, SEIS_PHONE.th / 2 + 0.72);
+          // the pad up against the phone's back: the back of the hand (+x) away from it; the thumb (+z) toward the top end
+          const Xw = back.clone().addScaledVector(Fg, -back.dot(Fg)).normalize(), Zw = Xw.clone().cross(Fg);
+          R = new THREE.Matrix4().makeBasis(Xw, Fg, Zw);
+        }
+        const Fg = new THREE.Vector3(0, 1, 0).transformDirection(R);
+        const Wr = A.wr.clone().applyMatrix4(R).add(T), E0 = A.e.clone().applyMatrix4(R).add(T);
+        // the arm: the body's upper arm and forearm reach the library hand's wrist (two bones, the elbow down and out at
+        // the body's side), the library forearm then turned at the wrist onto the body's (seisWrist): the wrist bent so
+        // much, at most, as a hand cupped under a phone is (the photo)
+        const E = seisIk(Sr, Wr, A.upR, A.foreR, SEIS_ELBOW_POLE);
+        const reach = Math.max(0, Wr.distanceTo(Sr) - (A.upR + A.foreR - 1.5));
+        const flex = (E.clone().sub(Wr).angleTo(E0.clone().sub(Wr)) * 180) / Math.PI, bent = Math.max(0, flex - 30) / 10;
+        // (the elbow well under the shoulder, beside the body's side, not drawn back behind it)
+        const high = Math.max(0, E.y - Sr.y + 15), inward = Math.max(0, E.x - (Sr.x + 4)), wide = Math.max(0, Sr.x - 14 - E.x), behind = Math.max(0, Sr.z + 6 - E.z);
+        // the wrist in front of the chest (not in the body), and out past the phone's right edge
+        const front = (q) => { const k = seisSkin(q.x, q.y); return Math.max(0, k.p[2] + 3 - q.z); };
+        const wl = Wr.clone().sub(P.O), alongW = wl.dot(P.L), acrossW = wl.dot(P.X);
+        const under = alongW > 0 && alongW < SEIS_PHONE.len - 1 && acrossW < SEIS_PHONE.hw - 0.5 ? 4 : 0;
+        // the curled fingers under the back (not through the phone): how far each joint is over the back's plane, where
+        // it is over the phone
+        let through = 0, apart = 0;
+        for (const c of A.curl || []) {
+          const q = c.clone().applyMatrix4(R).add(T).sub(P.O), up = q.dot(P.N) + SEIS_PHONE.th / 2 + 0.9, al = q.dot(P.L), ac = Math.abs(q.dot(P.X));
+          if (up > 0 && al > -0.5 && al < SEIS_PHONE.len + 0.5 && ac < SEIS_PHONE.hw + 0.5) through += up;
+          // (pose-final) the curled fingers under the phone's far half: how far each is out of it, or over the back's plane
+          apart += Math.hypot(Math.max(0, ac - SEIS_PHONE.hw - 2.5), Math.max(0, SEIS_PHONE.len * 0.55 - al, al - SEIS_PHONE.len - 1), Math.max(0, q.dot(P.N) + SEIS_PHONE.th / 2 + 0.3)); // (under the back's plane, by the far end, at most 2.5 cm out past the edge)
+        }
+        // the thumb on the screen's side: its last joint over the screen, within the phone's width (or just past its
+        // right edge) and in its far half: how far it is from there
+        let thumbOff = 0;
+        if (A.thumb) {
+          const q = A.thumb.clone().applyMatrix4(R).add(T).sub(P.O), h = q.dot(P.N) - (SEIS_PHONE.th / 2 + 0.9), al = q.dot(P.L), ac = q.dot(P.X);
+          thumbOff = Math.hypot(h, Math.max(0, SEIS_PHONE.len * 0.72 - al, al - SEIS_PHONE.len + 0.3), Math.max(0, ac - (SEIS_PHONE.hw - 0.3), -SEIS_PHONE.hw + 0.3 - ac)); // (pose-final: on the screen's far end, within its width)
+        }
+        const score = 0.8 * thumbOff + 3 * through + 1.5 * apart + 1.5 * reach + 0.6 * bent + 0.6 * high + 0.6 * inward + 0.4 * wide + 0.6 * behind + 0.6 * front(Wr) + under + 0.03 * Math.abs(gd) + 0.002 * Math.abs(bd - 10);
+        if (!best || score < best.score) best = { score, T, R, E, Fg, bd, gd, parts: { thumbOff, through, apart, reach, bent, high, inward, wide, behind, front: front(Wr), under } };
+      }
+      seisWrist(W, A, null); // (the library forearm back as it was built, before it is placed)
       W.finger.position.copy(best.T); W.finger.quaternion.setFromRotationMatrix(best.R); W.finger.updateMatrixWorld(true);
       if (W.tipGlow) W.tipGlow.material.opacity = 0; // (the flash's own glow is the phone's)
-      aim("upperarm_l", best.E.clone().sub(Sl));
-      // the finger's label point: where it comes out from under the phone's top end, in sight
-      const outT = best.T.clone().addScaledVector(best.Fg, -Math.max(2.4, (SEIS_PHONE.len - lens.clone().sub(P.O).dot(P.L)) + 2.2));
-      // (and the way back along the finger, in the phone's plane: the finger's label stands on the lit fingertip, toward
-      // the hand from the camera)
+      aim("upperarm_r", best.E.clone().sub(Sr));
+      const wrB = A.wr.clone().applyMatrix4(best.R).add(best.T);
+      { A.B.g.updateMatrixWorld(true); const e0 = A.wp(A.bones("lowerarm_r")[0]); aim("lowerarm_r", wrB.clone().sub(e0)); }
+      seisWrist(W, A, best.E);
+      // (pose-final) the right thumb on the screen's far end: its three joints chosen, for this place of the hand, so its last
+      // joint lies over the screen (a pad's height above it), 1.6 cm in from the far end, toward the phone's right side
+      seisThumbOn(W, A, P);
       const toward = best.Fg.clone().negate(); toward.addScaledVector(P.N, -toward.dot(P.N)); if (toward.lengthSq() > 1e-6) toward.normalize();
-      SEIS.arm = { tip: best.T.clone(), mid: outT, top, toward, elbow: best.E.clone(), shoulder: Sl.clone() };
+      const tipW = A.tip ? A.tip.clone().applyMatrix4(best.R).add(best.T) : best.T.clone();
+      SEIS.arm = { tip: tipW, mid: tipW.clone().addScaledVector(best.Fg, -3), top, toward, elbow: best.E.clone(), shoulder: Sr.clone(), score: best.score, bd: best.bd, gd: best.gd, parts: best.parts };
     },
   };
+}
+function seisThumbOn(W, A, P) {
+  const lib = W.pointerLib && W.pointerLib.lib; if (!lib) return;
+  const tb = lib.bones("thumb_03_r")[0]; if (!tb) return;
+  const want = P.O.clone().addScaledVector(P.L, SEIS_PHONE.len - 1.6).addScaledVector(P.X, 1.2).addScaledVector(P.N, SEIS_PHONE.th / 2 + 0.8);
+  const key = want.toArray().map((v) => Math.round(v * 2)).join(",") + "|" + W.finger.position.toArray().map((v) => Math.round(v * 2)).join(",");
+  const cs = Object.values(lib.copies), put = (t) => { for (const h of cs) poseHand(lib.group, (n) => h.getObjectByName(n), { thumb: t }); W.finger.updateMatrixWorld(true); };
+  if (A.thumbKey === key && A.thumbOn) { put(A.thumbOn); return; }
+  let bestT = A.thumbPose || SEIS_THUMB, bestD = Infinity;
+  for (let a = -0.9; a <= 1.51; a += 0.3) for (let b = -0.6; b <= 1.51; b += 0.3) for (let c = 0; c <= 1.21; c += 0.3) {
+    put([a, b, c]); const d = tb.getWorldPosition(new THREE.Vector3()).distanceTo(want);
+    if (d < bestD) { bestD = d; bestT = [a, b, c]; }
+  }
+  put(bestT); A.thumbKey = key; A.thumbOn = bestT; A.thumbMiss = bestD;
+}
+// the right elbow's way: down, out to the body's right and a little back
+const SEIS_ELBOW_POLE = new THREE.Vector3(-0.6, -1, -0.25);
+// the library hand's forearm turned at its wrist onto the body's forearm, the hand left where it is: its forearm bone
+// turned about the wrist so it runs to the body's elbow, its hand bone turned back by as much (each copy; with no elbow,
+// both put back as built)
+function seisWrist(W, A, elbow) {
+  const lib = W.pointerLib && W.pointerLib.lib; if (!lib) return;
+  for (const c of Object.values(lib.copies)) {
+    const Lb = c.getObjectByName("lowerarm_r"), Hb = c.getObjectByName("hand_r"); if (!Lb || !Hb) continue;
+    Lb.userData.rest0 ??= { q: Lb.quaternion.clone(), p: Lb.position.clone() }; Hb.userData.rest0 ??= { q: Hb.quaternion.clone() };
+    Lb.quaternion.copy(Lb.userData.rest0.q); Lb.position.copy(Lb.userData.rest0.p); Hb.quaternion.copy(Hb.userData.rest0.q);
+    Lb.updateMatrixWorld(true);
+    if (!elbow) continue;
+    const E0 = A.wp(Lb), W0 = A.wp(Hb), qL = Lb.getWorldQuaternion(new THREE.Quaternion()), qH = Hb.getWorldQuaternion(new THREE.Quaternion());
+    const Q = new THREE.Quaternion().setFromUnitVectors(E0.clone().sub(W0).normalize(), elbow.clone().sub(W0).normalize());
+    const head = W0.clone().add(E0.clone().sub(W0).applyQuaternion(Q)), qL1 = Q.clone().multiply(qL);
+    Lb.position.copy(Lb.parent.worldToLocal(head));
+    Lb.quaternion.copy(Lb.parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(qL1));
+    Lb.updateMatrixWorld(true);
+    Hb.quaternion.copy(qL1.clone().invert().multiply(qH)); Hb.updateMatrixWorld(true);
+  }
+}
+// the left hand under the phone's chest end, palm up: the arm by two bones to the wrist, then the hand turned so its
+// fingers run toward the phone's right edge (and SEIS_LEFT.turn° forward), its thumb toward the far end, its palm on the back
+const SEIS_LEFT = { along: 3.6, across: -3.0, turn: -30, drop: 2.75, thumb: [0.9, 0.6, 0.4] }; // the middle knuckle: cm up the phone from its bottom edge, cm across (+ its right), the fingers' turn toward the far end (degrees; < 0 a little back toward the chest), cm under the back (the fingers rise from the knuckles to their pads on the back)
+function seisLeftHand(A, P, aim) {
+  const hb = A.bones("hand_l")[0], ub = A.bones("upperarm_l")[0]; if (!hb || !ub) return;
+  const t = (SEIS_LEFT.turn * Math.PI) / 180;
+  const Fy = P.X.clone().multiplyScalar(Math.cos(t)).addScaledVector(P.L, Math.sin(t)).normalize(); // the fingers
+  const Tz = P.X.clone().multiplyScalar(-Math.sin(t)).addScaledVector(P.L, Math.cos(t)).normalize(); // the thumb's side
+  const palmN = Fy.clone().cross(Tz).normalize(); // (a left hand: the palm's normal is fingers × thumb side; here +N)
+  // (kit85f: the fingers under the phone near its chest end, their pads up on its back, the palm below it: the knuckles
+  // under its left edge, the fingers across under it toward its right edge, as the project photo holds it)
+  const K = P.O.clone().addScaledVector(P.L, SEIS_LEFT.along).addScaledVector(P.X, SEIS_LEFT.across).addScaledVector(P.N, -SEIS_PHONE.th / 2 - SEIS_LEFT.drop);
+  const Wt = K.clone().addScaledVector(Fy, -A.handL);
+  const Sl = A.wp(ub), El = seisIk(Sl, Wt, A.upL, A.foreL, new THREE.Vector3(0.8, -1, -0.3));
+  aim("upperarm_l", El.clone().sub(Sl));
+  A.B.g.updateMatrixWorld(true);
+  aim("lowerarm_l", Wt.clone().sub(A.wp(A.bones("lowerarm_l")[0])));
+  A.B.g.updateMatrixWorld(true);
+  seisHandTo(A, "l", Fy, Tz, palmN);
+}
+// a hand of the body turned, at its wrist, to a frame: its fingers along Fy (wrist → middle knuckle), its index's side
+// toward Tz, its palm facing palmN (the body's own hand bones: hand_<side>, middle_01, index_01, pinky_01)
+function seisHandTo(A, side, Fy, Tz, palmN) {
+  for (const c of Object.values(A.B.lib.copies)) {
+    const g = (n) => c.getObjectByName(n + "_" + side), h = g("hand"), k = g("middle_01"), i1 = g("index_01"), p1 = g("pinky_01"); if (!h || !k || !i1 || !p1) continue;
+    const w = A.wp(h), Y = A.wp(k).sub(w).normalize(), s = A.wp(i1).sub(A.wp(p1)), Z = s.addScaledVector(Y, -s.dot(Y)).normalize();
+    // (the palm: fingers × index side on a left hand, index side × fingers on a right one)
+    const N0 = side === "l" ? Y.clone().cross(Z) : Z.clone().cross(Y);
+    const Mc = new THREE.Matrix4().makeBasis(Y, Z, N0), Md = new THREE.Matrix4().makeBasis(Fy, Tz.clone().addScaledVector(Fy, -Tz.dot(Fy)).normalize(), palmN);
+    const R = new THREE.Quaternion().setFromRotationMatrix(Md.multiply(Mc.transpose()));
+    const qw = h.getWorldQuaternion(new THREE.Quaternion()), qp = h.parent.getWorldQuaternion(new THREE.Quaternion());
+    h.quaternion.copy(qp.invert().multiply(R.multiply(qw))); h.updateMatrixWorld(true);
+  }
 }
 
 // ---- the arm cuff (Microlife BP3NA1-1X, `Evaluation` p. 5: “placed over the left upper arm”): a band round the left
@@ -5566,9 +5729,9 @@ function seisLensEdge() {
 // each label: its point, words, colour, and the way it leans from the phone on the screen (up −1, down +1)
 const SEIS_LABELS = {
   phone: () => SEIS.pose && { p: seisEdge(SEIS_PHONE.len * 0.5), text: "Pixel phone", cls: "", lean: -0.6 },
-  accel: () => SEIS.pose && SEIS.pose.chip && { p: SEIS.pose.chip, text: SEIS.pose.flat ? "accelerometer · z-axis" : "accelerometer · y-axis", cls: "multi", lean: 2.6 },
+  accel: () => SEIS.pose && SEIS.pose.chip && { p: SEIS.pose.chip, text: SEIS.pose.flat ? "accelerometer · z-axis" : "accelerometer · y-axis", cls: "multi", lean: 2.6, dir: SEIS.pose.flat ? null : seisPageId() === "see" ? [-1, 0.35] : [-1, -1.1] }, // (pose-final: on see, under the sims part's "drag the phone" chip, which sits over the phone)
   // the camera at the phone's top end (its back is shown in the inset, seisInsetBlock), the finger where its lit tip shows past that end
-  camera: () => SEIS.pose && SEIS.pose.top && { p: SEIS.pose.top, text: SEIS.pose.flat ? "back camera (under the phone)" : "back camera + flash", cls: "interf", lean: -1.5 },
+  camera: () => SEIS.pose && SEIS.pose.top && { p: SEIS.pose.top, text: SEIS.pose.flat ? "back camera (under the phone)" : "back camera + flash", cls: "interf", lean: SEIS.pose.flat ? -1.5 : 0.2 },
   finger: () => SEIS.arm && SEIS.pose && SEIS.pose.leak && { p: SEIS.pose.leak, text: "index finger", cls: "interf", lean: 1.4 },
   speaker: () => SEIS.pose && SEIS.pose.spk && { p: SEIS.pose.spk, text: "speaker", cls: "", lean: 1 },
   mic: () => SEIS.pose && SEIS.pose.mic && { p: SEIS.pose.mic, text: "microphone", cls: "", lean: 1 },
@@ -5603,15 +5766,34 @@ function seisWordsBlock() {
       const z = ease.cam && ease.cam.zoom < 1 ? ease.cam.zoom : 1, P = SEIS.pose;
       const mid = P ? onStage(P.O.clone().addScaledVector(P.L, SEIS_PHONE.len / 2).toArray()) : null;
       const colOf = (cls) => (/interf/.test(cls) ? C.interf : /second/.test(cls) ? C.second : /multi/.test(cls) ? C.measured : /accent/.test(cls) ? C.accent : C["ink-2"]);
+      // (kit85f) the page's windows shown, on the stage (px): words that would run onto one go to the thing's other side
+      const wins = [];
+      { const slide = document.querySelector(".slide.on"), stg = document.getElementById("stage"), sr = stg ? stg.getBoundingClientRect() : null, k = sr && sr.width ? sr.width / 1920 : 1;
+        if (slide && sr) for (const w of slide.querySelectorAll(".panel")) {
+          const r = w.getBoundingClientRect(); if (r.width < 2 || r.height < 2) continue;
+          const cs = getComputedStyle(w); if (cs.visibility === "hidden" || cs.display === "none" || +cs.opacity < 0.05) continue;
+          const x0 = (r.left - sr.left) / k, y0 = (r.top - sr.top) / k; if (x0 < 740) continue;
+          wins.push([x0, y0, x0 + r.width / k, y0 + r.height / k]);
+        } }
+      const onWin = (x0, x1, y) => wins.some((w) => x1 + 24 > w[0] - 6 && x0 - 24 < w[2] + 6 && y + 18 > w[1] && y - 18 < w[3]);
       const put = (key, L, dir) => {
         const p = L.p.toArray ? L.p.toArray() : L.p, at = onStage(p);
         const words = S.seisTexts && S.seisTexts[key];
         let d = dir;
         if (!d) {
-          const v = mid ? [at[0] - mid[0], at[1] - mid[1]] : [1, 0], l = Math.hypot(v[0], v[1]) || 1;
+          const v = mid ? [at[0] - mid[0], at[1] - mid[1]] : [-1, 0], l = Math.hypot(v[0], v[1]) || 1;
           d = [v[0] / l, v[1] / l + (L.lean || 0)];
         }
-        const l = Math.hypot(d[0], d[1]) || 1, dx = (d[0] / l) * SEIS_LEAD, dy = (d[1] / l) * SEIS_LEAD, anchor = dx >= 0 ? "left" : "right";
+        const l = Math.hypot(d[0], d[1]) || 1, dy = (d[1] / l) * SEIS_LEAD;
+        let dx = (d[0] / l) * SEIS_LEAD;
+        // (kept in the frame: words that would run past its right edge, 1820 px, go to the thing's left, and past the
+        // text column's edge, 740 px, to its right; their width taken at 13 px a letter)
+        { const wd = (typeof words === "string" && words ? words : L.text).length * 13;
+          if (dx >= 0 && at[0] + dx + wd > 1820) dx = -Math.abs(dx); else if (dx < 0 && at[0] + dx - wd < 740) dx = Math.abs(dx);
+          const y = at[1] + dy;
+          if (dx >= 0 && onWin(at[0] + dx, at[0] + dx + wd, y) && !onWin(at[0] - dx - wd, at[0] - dx, y) && at[0] - dx - wd >= 740) dx = -dx;
+          else if (dx < 0 && onWin(at[0] + dx - wd, at[0] + dx, y) && !onWin(at[0] - dx, at[0] - dx + wd, y) && at[0] - dx + wd <= 1820) dx = -dx; }
+        const anchor = dx >= 0 ? "left" : "right";
         S.labels.push({ p, text: typeof words === "string" && words ? words : L.text, cls: L.cls, anchor, dx, dy, key });
         lead.push([at[0], at[1], at[0] + (dx + (anchor === "left" ? -5 : 5)) * z, at[1] + dy * z, colOf(L.cls)]);
       };
@@ -5622,7 +5804,7 @@ function seisWordsBlock() {
         if (key === "accel" && !((S.seisAccel ?? 1) > 0.5)) continue;
         if (key === "finger" && !((S.finger ?? 0) > 0.5)) continue;
         // (flat, the chip in the screen's middle: its words to the left, clear of the speaker's and the microphone's and of the inset)
-        put(key, L, key === "accel" && SEIS.pose && SEIS.pose.flat ? [-1, -0.45] : null);
+        put(key, L, key === "accel" && SEIS.pose && SEIS.pose.flat ? [-1, -0.45] : L.dir || null);
       }
       // the inset of the phone's back joined to the phone's top end, where the camera is
       if (SEIS.inset && SEIS.inset.on && P && P.top) {
@@ -5641,13 +5823,14 @@ function seisWordsBlock() {
   };
 }
 
-// ---- the inset of the phone's back (Fig. 1; `Seismo` p. 3: “place their index finger of the other hand over the
+// ---- the inset of the phone's back, on the use page only (SEIS_INSET_PAGES) (Fig. 1; `Seismo` p. 3: “place their index finger of the other hand over the
 // phone's back camera, covering both the camera and flash”): the back lies on the chest (or on the table), so the
 // scene's own view cannot see it. A second camera looks at the back's top end from behind the phone (the person, the
 // chair and the table left out of that view), drawn in a framed square beside the phone and joined to its top end:
 // the lens and the flash, and over them the index fingertip's pad, lit red by the flash (video 1 at 0:13). Where the
 // finger covers them their outlines are drawn dashed over it, each named there (lens, flash, fingertip).
 const SEIS_INSET = 220; // px
+const SEIS_INSET_PAGES = ["use"]; // the pages that show it
 function seisInsetBlock() {
   let el = null, cam = null;
   const free = (x, y, n) => {
@@ -5666,7 +5849,8 @@ function seisInsetBlock() {
     build(W) { return {}; },
     apply(S, W) {
       const P = SEIS.pose, R = W.renderer, PH = W.seisPhone;
-      const on = !!P && !!R && !!PH && (S.seis ?? 0) > 0.5 && (S.seisPhone ?? 1) > 0.5 && (P.flat || ((S.person ?? 0) > 0.5 && (S.finger ?? 0) > 0.5 && !!SEIS.arm));
+      // (on the end-to-end page only, the last of stage 2: the other pages name the camera at the phone's top end)
+      const on = SEIS_INSET_PAGES.includes(seisPageId()) && !!P && !!R && !!PH && (S.seis ?? 0) > 0.5 && (S.seisPhone ?? 1) > 0.5 && (P.flat || ((S.person ?? 0) > 0.5 && (S.finger ?? 0) > 0.5 && !!SEIS.arm));
       if (!el) {
         const host = document.getElementById("labels"); if (!host) return;
         el = document.createElement("canvas"); el.className = "seis-inset"; el.setAttribute("aria-label", "the phone's back");
@@ -5679,7 +5863,7 @@ function seisInsetBlock() {
       if (!on || !R3 || (ease.vis && (ease.vis.show3d ?? 1) < 0.5)) { el.style.display = "none"; return; }
       // where: beside the phone's top end, clear of the page's text, windows and controls
       const t = onStage(P.top.toArray()), n = SEIS_INSET;
-      const tries = [[70, -n - 130], [60, -n - 70], [120, -40], [90, -n / 2 - 40], [-n / 2, -n - 110], [90, 60], [-n - 90, -n - 40], [-n - 110, 40]];
+      const tries = [[160, -n - 120], [70, -n - 130], [60, -n - 70], [120, -40], [90, -n / 2 - 40], [-n / 2, -n - 110], [90, 60], [-n - 90, -n - 40], [-n - 110, 40]];
       let at = null; for (const [dx, dy] of tries) { const x = Math.round(t[0] + dx), y = Math.round(t[1] + dy); if (free(x, y, n)) { at = [x, y]; break; } }
       if (!at) { el.style.display = "none"; return; }
       SEIS.inset = { on: true, x: at[0], y: at[1], size: n };
@@ -5688,7 +5872,8 @@ function seisInsetBlock() {
       Object.assign(el.style, { display: "block", left: at[0] + "px", top: at[1] + "px", width: n + "px", height: n + "px" });
       // the second camera: behind the phone's back, a little toward its lower end, looking at the camera and the flash
       const tgt = P.lens.clone().add(P.flash).multiplyScalar(0.5).addScaledVector(P.L, -0.6);
-      const dir = P.N.clone().negate().multiplyScalar(0.9).addScaledVector(P.L, -0.35).addScaledVector(P.X, 0.15).normalize();
+      // (from under the phone, toward its lower end and its left edge: the right hand comes in from its right edge)
+      const dir = P.N.clone().negate().multiplyScalar(0.9).addScaledVector(P.L, -0.35).addScaledVector(P.X, P.flat ? 0.15 : -0.3).normalize();
       if (!cam) cam = new THREE.PerspectiveCamera(30, 1, 0.5, 400);
       cam.position.copy(tgt).addScaledVector(dir, 17); cam.up.copy(P.L); cam.lookAt(tgt); cam.updateProjectionMatrix(); cam.updateMatrixWorld();
       // only the phone and the hand on it (and the lights)
@@ -5730,7 +5915,7 @@ function seisInsetBlock() {
       g.font = "600 17px sans-serif"; tag("flash", n - 16 - g.measureText("flash").width, 12, fp[0], fp[1] - 0.55 * cmPx, C.interf);
       if (fingerOn) tag("fingertip, lit red", 10, n - 66, (lp[0] + fp[0]) / 2, (lp[1] + fp[1]) / 2 + 1.2 * cmPx, C.interf);
       g.font = "500 14px sans-serif"; g.fillStyle = C["ink-3"]; g.textAlign = "right";
-      g.fillText(P.flat ? "its back, lying on a flat surface" : "its back, against the chest", n - 10, n - 12); g.textAlign = "left";
+      g.fillText(P.flat ? "its back, lying on a flat surface" : "its back, seen from under it", n - 10, n - 12); g.textAlign = "left";
       g.strokeStyle = C.interf; g.lineWidth = 2; g.strokeRect(1, 1, n - 2, n - 2);
     },
   };
@@ -5773,8 +5958,11 @@ function seisChairBlock(fig) {
   };
 }
 // ================================================================ the 3-D scene (Seismo)
-// Fig. 1: a seated person presses the phone flat on the left chest, its screen to the front, and lays the other
-// hand's index finger over the back camera and the flash under its top end (`Seismo` p. 3). The scene's frame:
+// The official pose (the project photo and Fig. 1; video 1 at 0:11–0:25; video 2; `Seismo` p. 3): a seated person holds
+// the phone nearly level, its screen up, its bottom end on the chest at the right of the sternum, its top end pointing
+// forward and a little across; the RIGHT hand holds the far end, its index fingertip under it over the back camera and
+// the flash (lit red), its thumb on the screen's side; the LEFT hand's fingers support it from below near the chest.
+// The scene's frame:
 // centimetres; the person faces +z (the reader), its left is +x; the origin is the phone's place below the pectoral
 // on the sternum (placeU 0), so the chest's left side lies in the plane z ≈ 0, the plane the phone is dragged in
 // (js/sim-ui.js: the chain's plane z = 0). The blocks are scene/own.js's and the template's, in this order: the
@@ -5798,7 +5986,7 @@ function seisChairBlock(fig) {
 
 // ---- the person: the library's adult (HUM-adult) seated, facing +z. Where its skin is first found with the figure at
 // the origin, then the figure moved so that the sternum's place is the scene's origin
-const SEIS_SPOTS = { sternum: [10, 0.66], clavicle: [24, 0.88], heart: [18, 0.62] }; // [degrees toward its left, height on its trunk 0–1]
+const SEIS_SPOTS = { sternum: [10, 0.66], clavicle: [40, 0.86], heart: [18, 0.62] }; // (below the clavicle: off the midline, under the collarbone's middle) // [degrees toward its left, height on its trunk 0–1]
 const SEIS_FIG = { model: { id: "HUM-adult" }, pose: "sit", face: -90 };
 let SEIS_FIG_AT = [0, -87, -12];
 try {
@@ -5831,20 +6019,29 @@ function seisPlaceU(p) {
 }
 function seisKeep(p) { return [Math.min(SEIS_CHEST.x[1], Math.max(SEIS_CHEST.x[0], p[0])), Math.min(SEIS_CHEST.y[1], Math.max(SEIS_CHEST.y[0], p[1])), 0]; }
 
-// ---- the views (the person 166 cm, seated: its head 50 cm over the sternum's place, its feet 87 cm under it; seen
-// from its left, as Fig. 1 is taken, the phone reaching toward the reader's left)
+// ---- the views (the person 166 cm, seated: its head 50 cm over the sternum's place, its feet 87 cm under it): as the
+// project photo and Fig. 1 are taken, from the person's right side (az < 0: the camera on its right, −x), a little in
+// front and above, looking across the phone toward the chest, so the pose reads: the phone nearly level, screen up, its
+// bottom end on the chest, the right hand at its far end with the index under it (the lit tip), the left hand's fingers
+// under its chest end
+// (pose-final: the phone's place moved 13 cm down to mid-chest, so each view's target with it)
 const SEIS_VIEWS = {
-  // the default: the chest and the phone close, from the person's left, in front and a little above (as Fig. 1 is
-  // taken): the phone flat on the left chest, its screen, and the left index finger coming out from under its top end;
-  // what of the person falls under the page's windows is not drawn (the windows' clip, below)
-  whole: { t: [4, 6, 5], az: 0.78, el: 0.3, d: 185, sx: 1290, sy: 575 },
-  // the chest, the phone and the finger closer still
-  chest: { t: [5, 2, 5], az: 0.78, el: 0.3, d: 120, sx: 1290, sy: 450 },
+  // the default: the chest, the phone and both hands, the target off the phone to the screen's left and below (the person's back and the chair kept right of the text column,
+  // its head under the caption); what of the person falls under the page's windows is not drawn (the windows' clip, below)
+  whole: { t: [-14, -9.5, -6], az: -0.55, el: 0.6, d: 140, sx: 1290, sy: 575 },
+  // the chest, the phone and the hands closer still
+  chest: { t: [-10, -9.5, 0], az: -0.55, el: 0.6, d: 100, sx: 1290, sy: 450 },
   // the end-to-end simulator: the chest and the phone on the demo area's left, the windows in a column on its right
-  use: { t: [4, 4, 5], az: 0.7, el: 0.48, d: 225, sx: 1030, sy: 540 },
+  // (kit85f: the target 6 cm to the person's right and the view lower, so the chair stays right of the text column (x past
+  // 740) here and on the stage-3 explorations (physics/ablation.js: this view at d 300, sx 1000), the head under the capsule's line)
+  use: { t: [-6, -7, 7], az: -0.55, el: 0.6, d: 205, sx: 1105, sy: 680 },
+  // (no page's: the project photo's angle, for the part's own still: from over the person's right shoulder, above, looking
+  // down along the phone from its chest end to its far end)
+  photo: { t: [-5.7, -4, 7], az: -2.3, el: 1.15, d: 50, sx: 1150, sy: 560 },
   // the phone flat on the table (the beeps' set-up)
   flat: { t: SEIS.geo.flatAt.map((v, i) => v + [0, 1, 0][i]), az: 0.35, el: 0.85, d: 80, sx: 1300, sy: 420 },
 };
+const SEIS_INUSE = { d: 160, sx: 1415, sy: 610 }; // (kit85f) inuse's own framing of the whole view
 const SCENE = { centre: [4, -20, 10], cam: structuredClone(SEIS_VIEWS.whole) };
 
 // ---- the blocks, in the order they are built
@@ -5861,12 +6058,13 @@ block(seisPhoneBlock());
 block({
   build(W) { const B = W["figure:person"]; if (!B) return {}; const m = new THREE.Group(); markPart(m, "chest"); B.g.add(m); return { seisChestMark: m }; },
   apply(S, W) {
-    const m = W.seisChestMark; if (!m) return;
+    SEIS.W = W; const m = W.seisChestMark; if (!m) return;
     const on = (S.seis ?? 0) > 0.5 && (S.seisPhone ?? 1) > 0.5 && !S.seisFlat && (S.person ?? 0) > 0.5 && SEIS.pose;
     m.visible = !!on; if (on) m.position.copy(m.parent.worldToLocal(SEIS.pose.C.clone()));
   },
 });
-// the right index finger: the library's right hand and forearm, pointing (its origin the fingertip)
+// the right index finger: the library's right hand and forearm (its index bent a little and its thumb posed by
+// seisArmsBlock)
 block(pointerBlock({ model: { id: "HUM-hand_right" } }));
 // the finger is the device cell's part "finger": marked on the pointer's group once it is built
 block({ build(W) { if (W.finger) markPart(W.finger, "finger"); return {}; } });
@@ -5977,8 +6175,16 @@ function seisApply(S, st, o) {
   // a view: asked for, or the flat set-up's while the page keeps the default
   const view = o.view || (flat ? "flat" : null);
   if (view && SEIS_VIEWS[view] && S.cam && (o.view || JSON.stringify(S.cam) === JSON.stringify(SCENE.cam))) S.cam = structuredClone(SEIS_VIEWS[view]);
+  // (kit85f) inuse: its capsule's line is long (to x ~1370 at its first step), so the person is drawn a little smaller and
+  // further right and down, its head right of and under the line's end, the phone's labels still inside the frame
+  if (page === "inuse" && S.cam && !flat) S.cam = { ...S.cam, ...SEIS_INUSE };
+  // (pose-final) the stage-3 explorations take the use view at d 300 (physics/ablation.js): the phone, now lying level
+  // with the right hand at its edge, is drawn a little larger there
+  if (/^exp-/.test(page) && S.cam && S.cam.d === 300) S.cam = { ...S.cam, d: 250, sx: 1030 };
   return S;
 }
+// (for the part's own probes and stills: the scene's state, read only)
+try { window.__seis = { SEIS, SEIS_PHONE, SEIS_VIEWS, SEIS_INUSE, THREE }; } catch (e) {}
 // ================================================================ Seismo's Level 1 pages
 // Each: update(S, ctx) sets the scene; panel[name](g, ctx, w, h) draws a 2-D window.
 // ctx: t = time on the page (s), st = time since the last click, step = clicks so far.
@@ -6285,13 +6491,28 @@ function pgMotBlock() {
     build(W) {
       const fig = W["figure:person"]; if (!fig || !SEIS.fig) return {};
       const M = PARTS(), mk = (geo, mat, parent, at) => { const m = new THREE.Mesh(geo, mat); if (at) m.position.set(...at); parent.add(m); return m; };
-      // the unit (the cuff's, then the monitor's): a case standing on the lap, its screen to the reader
-      const unit = new THREE.Group(); W.scene.add(unit); unit.userData.block = "pgUnit";
-      const caseM = M.white(), cv = document.createElement("canvas"); cv.width = 256; cv.height = 170;
-      mk(new THREE.BoxGeometry(PG_MON.w, PG_MON.h, PG_MON.d), caseM, unit, [0, PG_MON.h / 2, 0]);
-      const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
-      const scrM = new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false });
-      mk(new THREE.PlaneGeometry(PG_MON.w - 1.4, PG_MON.h - 1.6), scrM, unit, [0, PG_MON.h / 2 + 0.2, PG_MON.d / 2 + 0.03]);
+      // a small side table at the person's left (a round top on a stem, on the floor; sizes assumed), and on it each
+      // way's own unit: the cuff's (a white case, its reading) at 1, the ECG monitor (a grey case, its traces) at 3
+      const tbl = new THREE.Group(); W.scene.add(tbl); tbl.userData.block = "pgTable";
+      const hipJ = SEIS.fig.parts.joint ? SEIS.fig.parts.joint("thigh_l") : [10, -35, 0], seat = SEIS.fig.parts.seat || 46;
+      const topY = SEIS_FLOOR + seat + 30; // (a side table's 76 cm or so)
+      tbl.position.set(hipJ[0] + 34, SEIS_FLOOR, hipJ[2] + 30);
+      const woodM = M.wood ? M.wood() : M.grey(), stemM = M.steel();
+      mk(new THREE.CylinderGeometry(16, 16, 2, 40), woodM, tbl, [0, topY - SEIS_FLOOR - 1, 0]);
+      mk(new THREE.CylinderGeometry(1.4, 1.4, topY - SEIS_FLOOR - 2, 16), stemM, tbl, [0, (topY - SEIS_FLOOR - 2) / 2, 0]);
+      mk(new THREE.CylinderGeometry(10, 10, 1.2, 32), stemM, tbl, [0, 0.6, 0]);
+      const mkUnit = (caseM, mode, name) => {
+        const g = new THREE.Group(); W.scene.add(g); g.userData.block = name;
+        const cv = document.createElement("canvas"); cv.width = 256; cv.height = 170; pgScreen(cv, mode);
+        mk(new THREE.BoxGeometry(PG_MON.w, PG_MON.h, PG_MON.d), caseM, g, [0, PG_MON.h / 2, 0]);
+        const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+        const scrM = new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false });
+        mk(new THREE.PlaneGeometry(PG_MON.w - 1.4, PG_MON.h - 1.6), scrM, g, [0, PG_MON.h / 2 + 0.2, PG_MON.d / 2 + 0.03]);
+        g.position.set(tbl.position.x, topY, tbl.position.z);
+        return { g, mats: [caseM, scrM] };
+      };
+      const units = { read: mkUnit(M.white(), "read", "pgCuffUnit"), ecg: mkUnit(M.grey(), "ecg", "pgEcgMonitor") };
+      const tblMats = [woodM, stemM];
       // the arm cuff of the earlier way (a generic home cuff, not the evaluation's rig): a dark band round the left upper
       // arm, placed each frame at its bone
       const band = new THREE.Group(); band.userData.block = "pgCuff"; W.scene.add(band);
@@ -6300,7 +6521,7 @@ function pgMotBlock() {
       // the finger clip (a pulse oximeter's, on the right index fingertip)
       const clip = new THREE.Group(); clip.userData.block = "pgClip";
       const clipM = M.grey(), redM = new THREE.MeshBasicMaterial({ color: C3D.interf, transparent: true });
-      mk(new THREE.BoxGeometry(3, 3.6, 3), clipM, clip, [0, 0.4, 0]); mk(new THREE.BoxGeometry(3.1, 1, 1.4), redM, clip, [0, 0.4, 0]);
+      mk(new THREE.BoxGeometry(4.2, 5, 4.2), clipM, clip, [0, 0.6, 0]); mk(new THREE.BoxGeometry(4.3, 1.4, 2), redM, clip, [0, 0.6, 0]);
       W.scene.add(clip); // (its own thing in the scene, placed each frame at the right index fingertip's bone)
       // the phone (the library's, generic) and the heart sound's arcs
       const phone = new THREE.Group(); W.scene.add(phone); phone.userData.block = "pgPhone";
@@ -6308,9 +6529,9 @@ function pgMotBlock() {
       const arcM = [0, 1, 2].map(() => new THREE.MeshBasicMaterial({ color: C3D.prior, transparent: true, depthTest: false, depthWrite: false }));
       const arcs = arcM.map((m) => { const a = new THREE.Mesh(new THREE.TorusGeometry(1, 0.06, 6, 40, Math.PI * 0.75), m); a.renderOrder = 6; W.scene.add(a); return a; });
       const padM = M.dark(); // the electrodes' pads, dark on the grey skin (electrodeBlock's own are white foam)
-      const all = [caseM, scrM, clipM, redM, bandM];
+      const all = [clipM, redM, bandM, ...tblMats, ...units.read.mats, ...units.ecg.mats];
       for (const m of all) { m.transparent = true; m.userData.a0 = m.opacity; }
-      return { pgMot: { padM, band, bandM, unit, cv, tex, mode: "", clip, phone, lib, arcs, arcM, all, scrM, caseM, clipM, redM, armed: false } };
+      return { pgMot: { padM, band, bandM, tbl, tblMats, units, clip, phone, lib, arcs, arcM, all, clipM, redM, armed: false } };
     },
     apply(S, W, dt, time) {
       const P = W.pgMot, A = W.seisArms; if (!P) return;
@@ -6319,8 +6540,11 @@ function pgMotBlock() {
       const wp = (n) => { const b = A && A.bones(n)[0]; return b ? b.getWorldPosition(new THREE.Vector3()) : null; };
       const fade = (key, want) => approach(key, want ? 1 : 0, dt, 6);
       const aU = fade("pgUnit", on && (k === 1 || k === 3)), aC = fade("pgClip", on && k === 3), aP = fade("pgPhone", on && k === 4);
-      for (const m of [P.caseM, P.scrM]) m.opacity = aU;
-      P.unit.visible = aU > 0.01; P.clipM.opacity = aC; P.redM.opacity = aC;
+      const aR = fade("pgCuffUnit", on && k === 1), aE = fade("pgEcgMon", on && k === 3);
+      for (const m of P.tblMats) m.opacity = aU; P.tbl.visible = aU > 0.01;
+      for (const [u, a] of [[P.units.read, aR], [P.units.ecg, aE]]) { for (const m of u.mats) m.opacity = a; u.g.visible = a > 0.01; }
+      P.unit = k === 3 ? P.units.ecg.g : P.units.read.g;
+      P.clipM.opacity = aC; P.redM.opacity = aC;
       const tipB = A && A.bones("index_03_r")[0]; P.clip.visible = aC > 0.01 && !!tipB;
       if (P.clip.visible) { const q = tipB.getWorldQuaternion(new THREE.Quaternion()); P.clip.quaternion.copy(q); P.clip.position.copy(tipB.getWorldPosition(new THREE.Vector3())); P.clip.updateMatrixWorld(true); }
       P.phone.visible = aP > 0.01; if (P.lib) P.lib.setOpacity(aP);
@@ -6335,16 +6559,8 @@ function pgMotBlock() {
         const inf = 0.5 - 0.5 * Math.cos(Math.min(1, (time % 6) / 2.5) * Math.PI * (time % 6 < 4 ? 1 : 0));
         P.band.scale.set(1 + 0.16 * inf, 1, 1 + 0.16 * inf); P.band.updateMatrixWorld(true);
       }
-      // where things are: the unit stands on the left hand, on the lap (the hand's bone is its wrist: on the fingers,
-      // toward the knee), its screen to the reader
-      const wr = wp("hand_l"), knee = wp("calf_l");
-      if (wr && knee && aU > 0.01) {
-        const tow = knee.clone().sub(wr); tow.y = 0; tow.normalize();
-        const p = wr.clone().addScaledVector(tow, 5); p.y += 3;
-        P.unit.position.copy(p); const c = W.camera.position; P.unit.lookAt(c.x, p.y, c.z); P.unit.updateMatrixWorld(true);
-        const mode = k === 1 ? "read" : "ecg";
-        if (mode !== P.mode) { P.mode = mode; pgScreen(P.cv, mode); P.tex.needsUpdate = true; }
-      }
+      // each unit stands on the table, its screen turned to the reader
+      for (const u of [P.units.read.g, P.units.ecg.g]) { const c = W.camera.position; u.lookAt(c.x, u.position.y, c.z); u.updateMatrixWorld(true); }
       const unitTop = P.unit.localToWorld(new THREE.Vector3(0, PG_MON.h, 0));
       // the wires: the cuff's tube (1), the electrodes' leads and the clip's (3)
       const E = W["electrodes:pgEcg"], ends = [];
@@ -6521,8 +6737,10 @@ const PAGES = {
       if (step === 2) { const ph = ((performance.now() / 1000) * 2) % 1; S.personPulse = 0.9 * Math.exp(-(((ph - 0.12) / 0.06) ** 2)); } // after exercise: the heart racing (120 bpm, drawn larger; assumed)
       // the view: the person whole over the window's row (1–3), the chest close at the phone (4)
       if (!win) pgCamAt(S, PG_BOX.full);
-      else if (step === 4) S.cam = { ...structuredClone(SEIS_VIEWS.whole), d: 170, sy: 520 };
-      else S.cam = { ...structuredClone(SEIS_VIEWS.whole), d: 255, sy: 390 };
+      // (the motivation's own views, from the person's left and front, as its things were laid out for them; not the
+      // scene's views, which frame Seismo's grip)
+      else if (step === 4) S.cam = { t: [4, 6, 5], az: 0.78, el: 0.3, d: 170, sx: 1290, sy: 520 };
+      else S.cam = { t: [4, -2, 8], az: 0.78, el: 0.3, d: 285, sx: 1290, sy: 420 };
     },
     // each way's window in the frame, in the one place, at its own clicks (the cuff's at 1 and 2: the day, then the
     // changes it misses), whatever the row would lay them as (side by side, the later ones past the frame's edge)
@@ -6551,12 +6769,14 @@ const PAGES = {
       const { step } = ctx;
       pgCamAt(S, PG_BOX.row);
       const labels = {};
-      if (step === 0) labels.sternum = "the chest";
-      if (step === 1 || step === 2) { labels.heart = "① PTT: heart to fingertip"; labels.finger = "fingertip"; }
+      // (each label names a thing drawn: the phone, the fingertip, the accelerometer, the camera; no heart, valve or
+      // pulse path is drawn on the body, so none is named)
+      if (step === 0) labels.phone = "the phone";
+      if (step === 1) labels.finger = "① PTT ends here: the pulse at the fingertip";
       if (step === 2) labels.accel = "② accelerometer";
       if (step === 3) labels.camera = "③ camera";
-      if (step === 4) labels.heart = "④ the aortic valve opens";
-      pgLook(S, { person: 1, phone: 1, finger: 1, accel: step === 2 ? 1 : 0, camera: step === 3 ? 1 : 0, beat: 1, labels }, { pulse: step === 1 || step === 2, cut: true });
+      if (step === 4) labels.accel = "④ AO: the valve opening, felt here";
+      pgLook(S, { person: 1, phone: 1, finger: 1, accel: step === 2 || step === 4 ? 1 : 0, camera: step === 3 ? 1 : 0, beat: 1, labels }, { cut: true });
     },
     panel: {
       beatTrace: (g, ctx, w, h) => {
@@ -6591,6 +6811,15 @@ const PAGES = {
     },
   },
 };
+
+// ---- no reader's camera on Level 3 (Brian's think-aloud note 7, 2026-11-22: "the camera belongs only on the last page
+// of the simulator stage"): the template offers the switch "Camera" on every page whose subject is dragged
+// (template/js/reader.js), reading each page's data-camera (template/js/free.js, camMoves); this file runs before
+// those, so the explorations are marked as moving no part of the reader, and the switch stays on `use` alone.
+for (const id of ["sim-real", "exp-ablation", "exp-related", "exp-general", "exp-physics", "exp-array"]) {
+  const sec = document.getElementById(id);
+  if (sec) sec.dataset.camera = "none";
+}
 // ---- the end-to-end simulator's tasks and its two windows (scene/use-sim.js runs the page): the camera on, the phone
 // moved up below the clavicle, the effort at 100 %, the beeps' synchronization off; each ticked as the reader does it
 const SEIS_USE = { done: new Set(), placed: false };
@@ -7735,8 +7964,8 @@ function s12DrawBias(id) {
       text(g, "one beep, two clocks (Fig. 3)", X + 10, top + 14, { size: 13, col: C["ink-2"], weight: 700, font: FONT });
       s12BeepBox(g, run, [X + 10, top + 26, inset - 20, bot - top - 44], { arrows: true, small: true, step: 0 });
       // which trace is which (Fig. 3 labels both): the microphone on the camera's clock, the z-axis on the accelerometer's
-      text(g, "mic (camera clock)", X + 10, bot + 6, { size: 12, col: C.interf, weight: 700, font: FONT });
-      text(g, "z-axis (accel. clock)", X + inset - 10, bot + 6, { size: 12, col: C.second, weight: 700, align: "right", font: FONT });
+      text(g, "mic (camera clock)", X + 10, bot + 6, { size: 12, col: C.second, weight: 700, font: FONT });
+      text(g, "z-axis (accel. clock)", X + inset - 10, bot + 6, { size: 12, col: C.interf, weight: 700, align: "right", font: FONT });
     }
   };
 }
@@ -7781,8 +8010,8 @@ function s12BeepBox(g, run, B, { arrows = true, aA = 1, aZ = 1, small = false } 
   const T = s12Beeps(run) || s12BeepsDrawn(run), t0 = T.t0, t1 = T.t1, au = T.sig.audio, z = T.sig.z;
   const [, ha] = s12Range(au, t0, t1, true), [, hz] = s12Range(z, t0, t1, true);
   const Bp = [B[0], B[1] + 22, B[2], B[3] - 22];
-  s12Plot(g, Bp, au, t0, t1, 0, ha, C.interf, small ? 1.3 : 1.6, { alpha: aA, absv: true });
-  s12Plot(g, Bp, z, t0, t1, 0, hz, C.second, small ? 1.3 : 1.6, { alpha: aZ * 0.9, absv: true });
+  s12Plot(g, Bp, au, t0, t1, 0, ha, C.second, small ? 1.3 : 1.6, { alpha: aA, absv: true });
+  s12Plot(g, Bp, z, t0, t1, 0, hz, C.interf, small ? 1.3 : 1.6, { alpha: aZ * 0.9, absv: true });
   const M = s12Map(Bp, t0, t1, 0, 1), ba = T.marks.beepAudio, bz = T.marks.beepAccel, ds = [];
   ba.forEach((a, i) => { const z1 = bz[i]; if (z1 == null) return; ds.push(z1 - a); if (arrows) arrow(g, M.X(a), B[1] + 10, M.X(z1), B[1] + 10, C.ink, 2, small ? 8 : 10); });
   if (!T.own) text(g, "drawn from the offset found", B[0] + B[2], B[1] - 2, { size: 12, col: C["ink-3"], align: "right", font: FONT });
@@ -7795,7 +8024,7 @@ function s12DrawBeeps(g, ctx, w, h) {
   const mean = s12BeepBox(g, run, B, { arrows: show, aA, aZ });
   if (show && mean != null) text(g, `offset found: ${Math.round(mean)} ms`, w - 18, h - 14, { size: 15, col: C.ink, weight: 700, align: "right", font: FONT });
   if (step === 1) s12Pill(g, 20, h - 20, C.accent, "NEW · three beeps");
-  else legend(g, 20, h - 18, [["|audio|, mic", C.interf, 3], ["|z accel|", C.second, 3]]);
+  else legend(g, 20, h - 18, [["mic (camera clock)", C.second, 3], ["z (accel. clock)", C.interf, 3]]);
 }
 const s12C1Page = {
   update(S, ctx) { const st = SIMS.c1; simFrame(st, ctx.dt); s12Scene(S, ctx, st, { fresh: (k) => (k === 1 ? ["accel"] : []), link: (k) => (k === 1 || k === 2 ? { key: "accel", to: "pttBias", col: "second", x: 0.45 } : k === 3 ? { key: "mic", to: "pttBias", col: "second", x: 0.85 } : null) }); },
@@ -8265,7 +8494,11 @@ const S34 = (() => {
       line(g, x0 + 4, mid, x0 + cw - 4, mid, C.line, 1);
       g.save(); g.strokeStyle = col; g.lineWidth = lit ? 3 : 2; g.lineJoin = "round"; g.beginPath();
       m.t.forEach((t, i) => (i ? g.lineTo(X(t), Y(m.y[i])) : g.moveTo(X(t), Y(m.y[i])))); g.stroke(); g.restore();
-      for (const p of m.marks) if (fin(p.t)) text(g, p.k.toUpperCase(), X(p.t), p.up ? Y(Math.max(p.y, 0)) - 7 : Y(Math.min(p.y, 0)) + 17, { size: 12, col: lit ? C.ink : C["ink-2"], align: "center", weight: 700 });
+      // each point (MC, IM, AO, MA) a dot on the curve, as Fig. 4 marks AO, and its name on a halo beside it
+      for (const p of m.marks) if (fin(p.t)) {
+        circle(g, X(p.t), Y(p.y), 3.5, C.bg, 1.5, lit ? C.ink : C["ink-2"]);
+        text(g, p.k.toUpperCase(), X(p.t), p.up ? Y(Math.max(p.y, 0)) - 9 : Y(Math.min(p.y, 0)) + 19, { size: 12, col: lit ? C.ink : C["ink-2"], align: "center", weight: 700, backed: true });
+      }
       text(g, m.name, x0 + cw / 2, h - 14, { size: 15, col: lit ? C.accent : C["ink-2"], align: "center", weight: lit ? 700 : 500, font: FONT });
     });
     text(g, `phone at ${placeName(cs.placeU)}`, w - 12, 40, { size: 13, col: C["ink-2"], align: "right", font: FONT });
@@ -8316,27 +8549,34 @@ const S34 = (() => {
     const trueOf = (t) => trues.reduce((b, a) => (b == null || Math.abs(a - t) < Math.abs(b - t) ? a : b), null);
     const isMA = (t) => { const a = trueOf(t); return a != null && Math.abs(t - (a + dl[3])) < Math.abs(t - (a + dl[1])); };
     const right = (x, s) => Math.min(x, w - 12 - 8 * s.length);
+    const bx = show.box && boxedBeat(R), named = show.lobes && bx ? bx.f : null; // (the boxed beat's IM and MA are named by its lobes below)
+    let usedR = -1e9; // (the right end of the PTT numbers written so far: a beat at the right edge writes its own left of
+    // "AO found" only where that is clear of them, else leaves them to the readouts)
     for (const f of found) {
       if (show.peaks) for (const m of f.mins) if (m.p > 0.15 * f.top.p && inV(m.t)) circle(g, X(m.t), Y(m.y), 3, null, 1, C["ink-3"]);
       const sw = !!(f.ma && show.check), wrong = show.im && inV(f.im.t) && isMA(f.im.t);
-      if (sw && inV(f.ma.t)) { circle(g, X(f.ma.t), Y(f.ma.y), 8, C["ink-3"], 2, null, [3, 3]); text(g, "MA", right(X(f.ma.t) + 5, "MA"), RowN, { size: 13, col: C["ink-2"], align: "left", weight: 600 }); }
+      if (sw && inV(f.ma.t) && f !== named) { circle(g, X(f.ma.t), Y(f.ma.y), 8, C["ink-3"], 2, null, [3, 3]); text(g, "MA", right(X(f.ma.t) + 5, "MA"), RowN, { size: 13, col: C["ink-2"], align: "left", weight: 600 }); }
       if (show.im && inV(f.im.t)) {
         circle(g, X(f.im.t), Y(f.im.y), 9, wrong ? C.accent : C.ink, 3);
-        if (wrong) text(g, "MA taken as IM", clamp(X(f.im.t), 60, w - 60), RowN, { size: 13, col: C.accent, align: "center", weight: 700 });
+        if (f === named) { /* named by the lobes */ }
+        else if (wrong) text(g, "MA taken as IM", clamp(X(f.im.t), 60, w - 60), RowN, { size: 13, col: C.accent, align: "center", weight: 700 });
         else text(g, "IM", X(f.im.t) - (sw ? 5 : 0), RowN, { size: 14, col: C.ink, align: sw ? "right" : "center", weight: 700 });
       }
       if (show.check && f.ahead && inV(f.ahead.t)) { const xm = (X(f.ahead.t) + X(f.top.t)) / 2; text(g, `ratio ${Math.round(f.ratio * 100)} %${f.swap ? " > 90 %" : ""}`, clamp(xm, 70, w - 60), RowR, { size: 13, col: f.swap ? C.accent : C["ink-2"], align: "center", weight: 600 }); }
       if (show.ao && f.ao && inV(f.ao.t)) {
         const x = X(f.ao.t), xp = X(f.apg);
         g.save(); g.fillStyle = C.accent; g.beginPath(); g.moveTo(x, RowP + 8); g.lineTo(x - 7, RowP - 4); g.lineTo(x + 7, RowP - 4); g.closePath(); g.fill(); g.restore();
-        text(g, "AO", x - 10, RowP + 4, { size: 13, col: C.accent, align: "right", weight: 700 });
+        text(g, "AO found", x - 10, RowP + 4, { size: 13, col: C.accent, align: "right", weight: 700, backed: true });
+        const xl_ = x - 10 - 8 * 8 - 8; // (left of "AO found", when the numbers have no room right of the APG peak)
         if (show.ptt && inV(f.apg) && fin(f.ptt)) {
           const s = `${Math.round(f.ptt)} ms`; line(g, x + 8, RowP, xp, RowP, C.accent, 2); line(g, xp, RowP - 6, xp, RowP + 6, C.accent, 2);
-          const roomR = xp + 6 + 8 * s.length < w - 10; text(g, s, roomR ? xp + 6 : x - 36, RowP + 5, { size: 13, col: C.accent, align: roomR ? "left" : "right", weight: 600, backed: true });
+          const roomR = xp + 6 + 8 * s.length < w - 10, a = trueOf(f.ao.t), st = a != null ? `true ${Math.round((f.apg - a) * 1000)} ms` : "";
+          const fitL = xl_ - 8 * Math.max(s.length, st.length) > usedR + 8, say = roomR || fitL;
+          if (say) usedR = roomR ? xp + 6 + 8 * Math.max(s.length, st.length) : xl_;
+          if (say) text(g, s, roomR ? xp + 6 : xl_, RowP + 5, { size: 13, col: C.accent, align: roomR ? "left" : "right", weight: 600, backed: true });
           // the true PTT above it, from the chain's true AO of this beat
-          const a = trueOf(f.ao.t);
-          if (a != null && inV(a)) { const xa = X(a), st = `true ${Math.round((f.apg - a) * 1000)} ms`; line(g, xa, RowT, xp, RowT, C.ink, 1.5); line(g, xa, RowT - 4, xa, RowT + 4, C.ink, 1.5);
-            text(g, st, roomR ? xp + 6 : xa - 6, RowT + 4, { size: 12, col: C.ink, align: roomR ? "left" : "right", weight: 600, backed: true }); }
+          if (a != null && inV(a)) { const xa = X(a); line(g, xa, RowT, xp, RowT, C.ink, 1.5); line(g, xa, RowT - 4, xa, RowT + 4, C.ink, 1.5);
+            if (say) text(g, st, roomR ? xp + 6 : Math.min(xa - 6, xl_), RowT + 4, { size: 12, col: C.ink, align: roomR ? "left" : "right", weight: 600, backed: true }); }
         }
       }
     }
@@ -8346,11 +8586,32 @@ const S34 = (() => {
     }
     if (show.ao) for (const t of trues.filter(inV)) line(g, X(t), B[1] + 2, X(t), B[1] - 22, C.ink, 2, [4, 3]);
     // the boxed beat: the one c3's readouts "PTT, boxed beat" and "Error, boxed beat" read (its marks inside the box)
-    const bx = show.box && boxedBeat(R);
     if (bx) {
       const xo = X(Math.min(bx.a, bx.f.ao.t)), xp = X(bx.f.apg), n = Math.max(`${Math.round(bx.ptt)} ms`.length, `true ${Math.round(bx.pttTrue)} ms`.length);
-      const roomR = xp + 6 + 8 * n < w - 10, x0 = roomR || !show.ptt ? xo - 26 : Math.min(xo - 26, xo - 44 - 8 * n), x1 = show.ptt && roomR ? xp + 12 + 8 * n : xp + 12, xl = show.im ? Math.min(x0, X(bx.f.im.t) - 58) : x0;
-      g.save(); g.strokeStyle = C.accent; g.lineWidth = 2; rrect(g, Math.max(4, xl), A[0] - 4, Math.min(w - 4, x1) - Math.max(4, xl), RowN + 10 - (A[0] - 4), 8); g.stroke(); g.restore();
+      const roomR = xp + 6 + 8 * n < w - 10, x0 = roomR || !show.ptt ? xo - 82 : Math.min(xo - 82, xo - 90 - 8 * n);
+      let x1 = show.ptt && roomR ? xp + 12 + 8 * n : xp + 12;
+      let xl = show.im ? Math.min(x0, X(bx.f.im.t) - 58) : x0;
+      // (with the lobes named, the box takes in their names: MC's 40 px left of the true AO, MA's (or "MA taken as IM") 40 px right)
+      if (named) { xl = Math.min(xl, X(bx.a) - 12 - 30); x1 = Math.max(x1, X(bx.a) + 26 + 8 * (show.im ? 15 : 3)); }
+      const yb = named ? RowR + 8 : RowN + 10;
+      g.save(); g.strokeStyle = C.accent; g.lineWidth = 2; rrect(g, Math.max(4, xl), A[0] - 4, Math.min(w - 4, x1) - Math.max(4, xl), yb - (A[0] - 4), 8); g.stroke(); g.restore();
+    }
+    // the boxed beat's four points (c3 steps 3-4, which name them; Fig. 4's MC, IM, AO, MA): each the shown signal's
+    // extremum within 9 ms of its true time (the chain's true AO and the spec's morphDelays), a dot on the curve and
+    // its name on a halo, off the traces, on a leader: IM and MA in the row below the SCG, MC and "AO true" in the row
+    // under it (c3 has no ratio row), so the true AO is told from the found one ("AO found", above the SCG) the SCG
+    if (named && bx) {
+      const ext = (c, up) => { let b = -1; for (let i = idxOf(T, c - 0.009); i < T.length && T[i] <= c + 0.009; i++) if (b < 0 || (up ? shown[i] > shown[b] : shown[i] < shown[b])) b = i; return b; };
+      const L = [["MC", dl[0], true, -1], ["IM", dl[1], false, -1], ["AO", dl[2], true, 1], ["MA", dl[3], false, 1]].map(([k, d, up, side]) => ({ k, up, side, i: ext(bx.a + d, up) })).filter((p) => p.i >= 0 && inV(T[p.i]));
+      const ma = L.find((p) => p.k === "MA"), wrongMA = !!(ma && show.im && Math.abs(T[ma.i] - named.im.t) < 0.006);
+      const xc = X(bx.a), at = { MC: [-12, RowR], IM: [-20, RowN], AO: [12, RowR], MA: [26, RowN] };
+      for (const p of L) {
+        const px = X(T[p.i]), py = Y(shown[p.i]), s = p.k === "MA" && wrongMA ? "MA taken as IM" : p.k === "AO" ? "AO true" : p.k;
+        const lx = clamp(xc + at[p.k][0], 60, w - 20), ly = at[p.k][1], ex = lx - p.side * 2, ey = ly - 13;
+        line(g, px, py, ex, ey, C.bg, 4); line(g, px, py, ex, ey, p.k === "MA" && wrongMA ? C.accent : C.ink, 1.5);
+        circle(g, px, py, 3.5, C.bg, 1.5, C.ink);
+        text(g, s, lx, ly, { size: 13, col: p.k === "MA" && wrongMA ? C.accent : C.ink, align: p.side < 0 ? "right" : "left", weight: 700, backed: true });
+      }
     }
     text(g, "APG", 50, A[0] + 16, { size: 13, col: C.second, align: "right", weight: 600 });
     text(g, "SCG", 50, (B[0] + B[1]) / 2 + 5, { size: 13, col: isF ? C.accent : C["ink-2"], align: "right", weight: 600 });
@@ -8393,9 +8654,9 @@ const S34 = (() => {
   // (the narrative's guide on c3: 1 the raw signal, 2-3 the shapes, MA as deep as IM at the sternum, 4 MA taken for
   // IM: the phone stays at the sternum through them, and goes back and forth once they are said)
   const c3Place = (st) => (st.step >= 5 ? (Math.floor(st.tau / C3_HOLD) % 2 ? 1 : 0) : 0);
-  const c3Show = (k) => (k >= 4 ? C3_SHOW : { filtered: k >= 2, box: true });
+  const c3Show = (k) => (k >= 4 ? C3_SHOW : { filtered: k >= 2, box: true, lobes: k >= 3 });
   const ALL = { filtered: true, windows: true, peaks: true, im: true, check: true, ao: true, ptt: true };
-  const C3_SHOW = { ...ALL, check: false, box: true }; // (the problem: no IM check, so no peak ahead is weighed)
+  const C3_SHOW = { ...ALL, check: false, box: true, lobes: true }; // (the problem: no IM check, so no peak ahead is weighed)
   // s3's clicks (its guide): 0 the raw y-axis; 1 band-passed; 2 the search windows; 3 the negative peaks, IM; 4 the
   // check; 5 AO and the PTT of each beat; 6 the switches the reader's
   const s3Show = (k) => ({ filtered: k >= 1, windows: k >= 2, peaks: k >= 3, im: k >= 3, check: k >= 4, ao: k >= 5, ptt: k >= 5 });
@@ -8557,10 +8818,10 @@ const S34 = (() => {
     text(g, `● day 1: ${n} of ${D.day1.length}`, tx, 88, { size: 13, col: C.accent, weight: 600, font: FONT });
     if (k >= 3) text(g, "○ days 2–4", tx, 108, { size: 13, col: C["ink-2"], weight: 600, font: FONT });
     text(g, "BP = K1/PTT + K2", tx, 136, { size: 14, col: C.ink, weight: 700, font: FONT });
-    text(g, "the paper's fit (Fig. 5)", tx, 154, { size: 12, col: C["ink-3"], font: FONT });
+    text(g, "PTT in s (Fig. 5)", tx, 154, { size: 12, col: C["ink-3"], font: FONT });
     if (k >= 2 && fin(D.K1) && fin(D.K2)) {
-      text(g, `K1 = ${D.K1.toFixed(1)}`, tx, 178, { size: 13, col: C.accent, font: FONT });
-      text(g, `K2 = ${D.K2 < 0 ? "−" : ""}${Math.abs(D.K2).toFixed(1)}`, tx, 196, { size: 13, col: C.accent, font: FONT });
+      text(g, `K1 = ${D.K1.toFixed(1)} mmHg·s`, tx, 178, { size: 13, col: C.accent, font: FONT });
+      text(g, `K2 = ${D.K2 < 0 ? "−" : ""}${Math.abs(D.K2).toFixed(1)} mmHg`, tx, 196, { size: 13, col: C.accent, font: FONT });
       text(g, s4.ctl.calibMode ? "fit: this person" : "fit: all seven", tx, 218, { size: 13, col: C["ink-2"], font: FONT });
     }
   }
@@ -8738,7 +8999,7 @@ PAGES.use = {
     sceneSet(S, st, { labels: ["accel", "camera", "finger"] });
     // where the reader can act: the drag cue at the phone, until it is first dragged (js/show.js, cueOf)
     const cue = typeof cueOf === "function" ? cueOf(st, "drag the phone") : null, P = SEIS.pose;
-    if (cue && P && P.O && Array.isArray(S.labels)) S.labels.push({ p: P.O.clone().addScaledVector(P.L, SEIS_PHONE.len / 2).toArray(), text: cue[0], cls: cue[1], dy: -60, key: "cue" });
+    if (cue && P && P.O && Array.isArray(S.labels)) S.labels.push({ p: P.O.clone().addScaledVector(P.L, SEIS_PHONE.len / 2).toArray(), text: cue[0], cls: cue[1], dx: -150, dy: -175, anchor: "right", key: "cue" }); // (kit85f: higher, its ring clear of the accelerometer's words)
   },
   status() {
     const r = SIMS.use.sim && SIMS.use.sim.last; if (!r) return "measuring";
@@ -8774,10 +9035,10 @@ PAGES.use = {
 function seisPressHandle() {
   return {
     dof: "press", ctl: "press", range: [0, 100], span: 140,
-    // into the chest, across the phone as it lies now (read each frame)
-    get axis() { const P = SEIS.pose; return P && !P.flat ? P.N.clone().negate().toArray() : [0, 0, -1]; },
-    // the grip in front of the screen's lower half, 4.5 cm out, its arrow onto the phone and into the chest (away from
-    // the camera's end and its label; the press pushes the whole phone in)
+    // into the chest: the phone held level, its bottom edge on the chest, is pushed in along its length (read each frame)
+    get axis() { const P = SEIS.pose; return P && !P.flat ? P.L.clone().negate().toArray() : [0, 0, -1]; },
+    // the grip over the screen's lower half, 4.5 cm above it, its arrow toward the chest (away from the camera's end
+    // and its label; the press pushes the whole phone in)
     at() { const P = SEIS.pose; return P ? P.O.clone().addScaledVector(P.L, SEIS_PHONE.len * 0.3).addScaledVector(P.N, 4.5).toArray() : [0, 8, 6]; },
     label() { return ""; }, // (its words are the scene's: scene/own.js, seisWordsBlock, clear of its arrow)
   };
@@ -8790,11 +9051,12 @@ function seisSteadyPtt(s) {
 }
 // ---------------------------------------------------------------- the Real-to-Simulation Gap (sim-real)
 // The paper's own study run through the model, each tab beside the paper's figure or table: Table 1 (R and RMSE per
-// subject), Fig. 6 (all pairs against the cuff; Bland–Altman), Fig. 7 (the CDF of |error|), Fig. 8 (subjects 3 and 4
-// across effort), and the authors' clip. The protocol is the chain's (chain.study: 4 days × 7 measurements, day 1
+// subject), Fig. 6 (all pairs against the cuff; Bland–Altman), Fig. 7 (the CDF of |error|) and Fig. 8 (subjects 3 and
+// 4 across effort, the paper's figure under ours). The protocol is the chain's (chain.study: 4 days × 7 measurements, day 1
 // calibrates), run one subject a frame so the page never stalls. The paper's numbers are the physics data's
 // (outputs table1, groupFit, cdf, fig8), never typed here.
-// What the reader changes: the cuff's own error (cuffErr, assumed 4 mmHg: the paper's cuff is “not designed for
+// What the reader changes: the cuff's own error (cuffErr, assumed 4 mmHg; all three levels are run, the one shown first,
+// so the Table 1 tab's readout gives the mean R for each before a try: the paper's cuff is “not designed for
 // measuring rapidly changing blood pressure”, Discussion: Limitations). An exact cuff shows how much of the paper's
 // error the model puts on the reference, not on the phone. A level's runs are kept.
 {
@@ -8845,7 +9107,8 @@ function seisSteadyPtt(s) {
     const under = (x) => e.filter((v) => v < x).length / e.length, bm = mean(d), bs = sd(d);
     const no4 = all.filter((p) => p.s !== 4);
     return (L.stats = { subs, all, r: pearson(est, cuff), rmse: rmse(est, cuff), baMean: bm, baHi: bm + 1.96 * bs, baLo: bm - 1.96 * bs, e, under5: under(5), under10: under(10), under15: under(15), max: e[e.length - 1],
-      rMean: mean(subs.map((s) => s.r)), rmseMean: mean(subs.map((s) => s.rmse)), rNo4: pearson(no4.map((p) => p.est), no4.map((p) => p.cuff)) });
+      // a subject whose cuff never moves (subject 4 with an exact cuff) has no R: the mean is of the subjects that have one
+      rMean: mean(subs.map((s) => s.r).filter(isFinite)), rDefined: subs.filter((s) => isFinite(s.r)).length, rmseMean: mean(subs.map((s) => s.rmse)), rNo4: pearson(no4.map((p) => p.est), no4.map((p) => p.cuff)) });
   }
   // a subject's average over the four days at each of the seven measurements: 1/PTT (1/s) and the cuff's DBP
   function trendOf(S, id) {
@@ -8855,7 +9118,7 @@ function seisSteadyPtt(s) {
   }
   // the level shown lands a moment after its runs are through (the page's own play), so a still is not of a half run
   const landed = () => { const L = R.runs[R.level]; return done() && L.t0 != null && R.st - L.t0 > 0.6; };
-  const f1 = (v, d = 1) => (isFinite(v) ? v.toFixed(d) : "–"), pc = (v) => (isFinite(v) ? `${Math.round(v * 100)} %` : "–");
+  const f1 = (v, d = 1) => (isFinite(v) ? v.toFixed(d).replace(/^-(0\.?0*)$/, "$1") : "–"), pc = (v) => (isFinite(v) ? `${Math.round(v * 100)} %` : "–");
 
   // ---- the windows
   const TB = T1 || { r: [], rmse: [] };
@@ -8875,30 +9138,6 @@ function seisSteadyPtt(s) {
   // a note whose words are read when it is drawn (the level's numbers)
   const live = (f, y, align) => ({ get text() { return f(); }, get col() { return LEVEL_COL(R.level); }, y, size: 15, align });
 
-  // Table 1, written out from the physics data (outputs table1) at a size that reads: each participant's age, sex,
-  // size, DBP ranges, RMSE and R, their mean and SD; our RMSE and R beside the paper's, in our colour
-  function drawTable1(g, ctx, w, h) {
-    if (!T1) return waiting(g, w, h, "Table 1 is not in the physics data");
-    const S = SNOW(), col = C[LEVEL_COL(R.level)];
-    const heads = ["", "age", "sex", "weight, lb", "height, in", "day 1 DBP", "all days DBP", "RMSE", "R", "ours: RMSE", "ours: R"];
-    const xs = [24, 110, 175, 240, 350, 460, 590, 730, 815, 890, 1010].map((x) => (x * (w - 30)) / 1080);
-    const top = 64, rh = (h - top - 16) / 10;
-    heads.forEach((t, j) => text(g, t, xs[j], top, { size: 15, col: j >= 9 ? col : C["ink-3"], weight: 600 }));
-    const row = (i, cells, ours, strong) => {
-      const y = top + (i + 1) * rh;
-      if (strong) { g.save(); g.fillStyle = rgba(C.ink, 0.07); g.fillRect(xs[0] - 10, y - rh * 0.7, w - xs[0] - 10, rh); g.restore(); }
-      cells.forEach((t, j) => text(g, String(t), xs[j], y, { size: 17, col: C.ink, weight: strong ? 700 : 500 }));
-      ours.forEach((t, j) => text(g, t, xs[9 + j], y, { size: 17, col, weight: strong ? 700 : 500 }));
-    };
-    T1.id.forEach((id, i) => {
-      const s = S && S.subs[i];
-      row(i, [`S${id}`, T1.age[i], T1.sex[i], T1.weight[i], T1.height[i], T1.day1[i].join("–"), T1.all[i].join("–"), T1.rmse[i], T1.r[i].toFixed(2)],
-        [s ? f1(s.rmse) : "…", s ? f1(s.r, 2) : "…"], id === R.sub);
-    });
-    row(7, ["μ", T1.mean.age, "", T1.mean.weight, T1.mean.height, "", "", T1.mean.rmse, T1.mean.r.toFixed(2)], [S ? f1(S.rmseMean) : "…", S ? f1(S.rMean, 2) : "…"]);
-    row(8, ["σ", T1.sd.age, "", T1.sd.weight, T1.sd.height, "", "", T1.sd.rmse.toFixed(1), T1.sd.r.toFixed(2)], ["", ""]);
-  }
-
   // Fig. 8's layout: per subject (columns) 1/PTT over the cuff's DBP (rows); our four days thin, our average and the
   // paper's average (the physics data's, read off the figure's grey lines) thick. The paper's own figure stands beside.
   function drawTrend(g, ctx, w, h) {
@@ -8916,7 +9155,6 @@ function seisSteadyPtt(s) {
         const y0 = top + r * (rh + 34), Y = (v) => y0 + rh - ((v - lo) / (hi - lo)) * rh;
         yGrid(g, [x0, y0, pw, rh], lo, hi, (v) => v.toFixed(dp));
         text(g, lab, x0 + 6, y0 - 6, { size: 13, col: C["ink-3"] });
-        EFF.forEach((e, k) => { if (e === R.effort) { g.save(); g.fillStyle = rgba(C.accent, 0.08); g.fillRect(X(k) - 8, y0, 16, rh); g.restore(); } });
         const path = (arr, col, lw, dash, dots) => { g.save(); g.strokeStyle = col; g.lineWidth = lw; if (dash) g.setLineDash(dash); g.beginPath(); let on = false; arr.forEach((v, k) => { if (!isFinite(v)) return; on ? g.lineTo(X(k), Y(v)) : g.moveTo(X(k), Y(v)); on = true; }); g.stroke(); g.restore(); if (dots) arr.forEach((v, k) => isFinite(v) && circle(g, X(k), Y(v), 4, null, 0, col)); };
         for (const d of days) path(d, rgba(C[LEVEL_COL(R.level)], 0.35), 1.5);
         if (P && P[pk]) path(P[pk], C.measured, 3, [7, 5], true);
@@ -8925,7 +9163,7 @@ function seisSteadyPtt(s) {
       });
     });
     legend(g, gx, h - 44, [["paper, 4 days' average", C.measured, 3, [7, 5]], ["ours, average", C[LEVEL_COL(R.level)], 3]]);
-    legend(g, gx, h - 18, [["ours, each day", rgba(C[LEVEL_COL(R.level)], 0.5), 2], ["shaded: the effort marked", rgba(C.accent, 0.35), 10]]);
+    legend(g, gx, h - 18, [["ours, each day", rgba(C[LEVEL_COL(R.level)], 0.5), 2]]);
   }
 
   PAGES[ID] = {
@@ -8933,6 +9171,7 @@ function seisSteadyPtt(s) {
     update(S, { step, st }) {
       S.show3d = 0; R.st = st; R.step = step;
       const L = runLevel(R.level); if (done() && L.t0 == null) L.t0 = st;
+      else if (done()) { const next = LEVELS.find((l) => !done(l) && !(R.runs[l] && R.runs[l].err)); if (next != null) runLevel(next); } // the other cuffs, a subject a frame, after the one shown
       if (L.t0 != null && L.t0 > st) L.t0 = st; // the page opened again
     },
     status() {
@@ -8943,18 +9182,19 @@ function seisSteadyPtt(s) {
     },
     ro() {
       const S = landed() ? stats() : null, run = "running…";
-      if (!S) return { rMean: run, rmseMean: run, rSub: run, rAll: run, rmseAll: run, baMean: run, u5: run, u10: run, u15: run, emax: run, r3: run, r4: run, rNo4: run, saw0: "", saw1: "", saw2: "", saw3: "" };
+      const byCuff = () => { const [e, a, r] = [0, CUFF0, 2 * CUFF0].map((l) => (done(l) ? stats(l) : null)); return e && a && r ? `${f1(e.rMean, 2)} · ${f1(a.rMean, 2)} · ${f1(r.rMean, 2)}` : run; };
+      if (!S) return { rCuff: run, rMean: run, rmseMean: run, rSub: run, rAll: run, rmseAll: run, baMean: run, u5: run, u10: run, u15: run, emax: run, r3: run, r4: run, rNo4: run, saw0: "", saw1: "", saw2: "", saw3: "" };
       const s = S.subs[R.sub - 1], out = {
-        rMean: f1(S.rMean, 2), rmseMean: `${f1(S.rmseMean)} mmHg`, rSub: `${f1(s.r, 2)} · ${f1(s.rmse)} mmHg`,
+        rMean: S.rDefined < 7 ? `${f1(S.rMean, 2)} (${S.rDefined} of 7)` : f1(S.rMean, 2), rmseMean: `${f1(S.rmseMean)} mmHg`, rSub: `${f1(s.r, 2)} · ${f1(s.rmse)} mmHg`,
         rAll: f1(S.r, 2), rmseAll: `${f1(S.rmse)} mmHg`, baMean: `${f1(S.baMean)} mmHg`,
         u5: pc(S.under5), u10: pc(S.under10), u15: pc(S.under15), emax: `${f1(S.max)} mmHg`,
-        r3: f1(S.subs[2].r, 2), r4: f1(S.subs[3].r, 2), rNo4: f1(S.rNo4, 2),
+        rCuff: byCuff(), r3: f1(S.subs[2].r, 2), r4: f1(S.subs[3].r, 2), rNo4: f1(S.rNo4, 2),
       };
       // what each tab showed, once the reader has tried a level (nothing said before the first try)
       if (!R.tried) Object.assign(out, { saw0: "", saw1: "", saw2: "", saw3: "" });
       else {
         const pr = T1 ? T1.mean.rmse : NaN, lv = levelName(R.level);
-        out.saw0 = R.level === 0 ? `With an exact cuff our mean RMSE is ${f1(S.rmseMean)} mmHg, against the paper's ${f1(pr)}: the cuff's error is most of it.`
+        out.saw0 = R.level === 0 ? `With an exact cuff our mean RMSE is ${f1(S.rmseMean)} mmHg, against the paper's ${f1(pr)}: in our model, the rest is the cuff's error.`
           : `With ${lv}, our mean RMSE is ${f1(S.rmseMean)} mmHg; the paper's is ${f1(pr)} mmHg.`;
         out.saw1 = `With ${lv}, our ${S.all.length} estimated pairs (days 2–4) give R ${f1(S.r, 2)} and RMSE ${f1(S.rmse)} mmHg; the paper's estimates give ${G6 ? `${G6.r} and ${G6.rmse}` : "Fig. 6's"}.`;
         out.saw2 = `With ${lv}, ${pc(S.under10)} of our errors are under 10 mmHg; the paper's figure gives ${F7 ? pc(F7.y[1]) : "Fig. 7's"}.`;
@@ -8966,12 +9206,16 @@ function seisSteadyPtt(s) {
       return out;
     },
     panel: {
-      // Table 1: each subject's R and RMSE, the paper's (light) beside the model's; the paper's whole table under them
-      subj: { kind: "bars", box: [70, 56, 30, 70], range: [0, 1], dp: 1, inset: 0.08, bars: pairBars("r"),
-        legend: () => [["paper, Table 1", "measured", 10], [`ours, ${levelName(R.level)}`, LEVEL_COL(R.level), 10]] },
+      // Table 1: each subject's R and RMSE, the paper's (light) beside the model's
+      // with a line across for each mean R: the paper's (dashed) and ours at each cuff, so a still shows what the cuff's
+      // error does to R before any try (all three levels run in the background)
+      subj: { kind: "bars", box: [70, 56, 30, 100], range: [0, 1], dp: 1, inset: 0.08, bars: pairBars("r"),
+        lines: () => [...(T1 ? [{ v: T1.mean.r, col: "measured", w: 3, dash: [8, 6] }] : []),
+          ...LEVELS.filter((l) => done(l)).map((l) => ({ v: stats(l).rMean, col: LEVEL_COL(l), w: l === R.level ? 3 : 2, dash: l === R.level ? undefined : [3, 4] }))],
+        notes: [{ get text() { const m = (l) => (done(l) ? f1(stats(l).rMean, 2) : "…"); return `mean R: the paper's ${T1 ? f1(T1.mean.r, 2) : "–"}; ours ${m(0)} with an exact cuff, ${m(CUFF0)} at ${CUFF0} mmHg, ${m(2 * CUFF0)} at ${2 * CUFF0} mmHg`; }, y: 44, size: 15 }],
+        legend: () => [["paper, Table 1", "measured", 10], [`ours, ${levelName(R.level)}`, LEVEL_COL(R.level), 10], ["mean R, paper", "measured", 3, [8, 6]], ["ours: exact", "second", 3], [`${CUFF0} mmHg`, "accent", 3], [`${2 * CUFF0} mmHg`, "interf", 3]] },
       subjRmse: { kind: "bars", box: [70, 56, 30, 70], range: [0, 12], dp: 0, inset: 0.08, bars: pairBars("rmse"),
         legend: () => [["paper, Table 1", "measured", 10], [`ours, ${levelName(R.level)}`, LEVEL_COL(R.level), 10]] },
-      tab1: drawTable1,
       // Fig. 6, top: every estimate against the cuff; the numbers of both written under it
       corr: { kind: "versus", box: [90, 50, 30, 150], x: [55, 125], y: [55, 125], ready: SNOW, wait: "running the study…",
         series: [ident,
@@ -9011,10 +9255,10 @@ function seisSteadyPtt(s) {
       // Fig. 8: subjects 3 and 4 across the seven measurements, beside the paper's figure
       trend: drawTrend,
       fig8: { kind: "figure", media: "fig-8" },
-      clip: { kind: "clip", media: "use", mark: [0.5, 0.42] },
     },
   };
-  // The cuff presets and the subject and effort the windows mark: the page runs no live chain, so its controls are
+  // The cuff presets (the subject marked stays the spec's, 3: the sliders for it and the effort were taken out so the
+  // column ends above the status line, kit85 crowd rule): the page runs no live chain, so its controls are
   // its own (a preset pressed while its level stands)
   const sec = document.getElementById(ID);
   if (sec) {
@@ -9661,8 +9905,15 @@ function uvDraw(g, ctx, w, h) {
   uniGlow(g, mx, my, (28 + 4 * Math.sin(t * 5)) * r0, col);
   g.globalAlpha = 1; g.font = `700 36px ${FONT}`; g.textAlign = "left"; g.fillStyle = PAL.ink;
   if (UV.gapA > 0.5) { g.textAlign = "center"; uvT(g, KG.name, mx, my + 58); }
-  else { uvT(g, KG.name, mx + 32, my - 14); g.font = `500 20px ${MONO}`; g.fillStyle = PAL.ink2; uvT(g, `${me.p.venue || me.p.year || ""}`, mx + 32, my + 16); }
-  taken.push([mx - 32, my - 52, mx + 250, my + 26]);
+  else {
+    // (on the star's left where its name would run past the window's right edge: WindDancer's, near the Acoustic rim)
+    const vw = `${me.p.venue || me.p.year || ""}`, nw = g.measureText(KG.name).width; g.font = `500 20px ${MONO}`; const ww = Math.max(nw, g.measureText(vw).width); g.font = `700 36px ${FONT}`;
+    const right = g.canvas.width / ((g.getTransform && g.getTransform().a) || 1), left = mx + 32 + ww > right - 16;
+    g.textAlign = left ? "right" : "left"; const lx = left ? mx - 32 : mx + 32;
+    uvT(g, KG.name, lx, my - 14); g.font = `500 20px ${MONO}`; g.fillStyle = PAL.ink2; uvT(g, vw, lx, my + 16); g.textAlign = "left";
+    taken.push(left ? [mx - 40 - ww, my - 52, mx + 32, my + 26] : [mx - 32, my - 52, mx + 40 + ww, my + 26]);
+  }
+  if (UV.gapA > 0.5) taken.push([mx - 32, my - 52, mx + 250, my + 26]);
   // names: the selected paper's, the one pointed at, and each view's most cited, where they cover no other
   // (a paper picked or pointed at is always named: at the first place round its star that covers no other name,
   // the paper's own first of all: beside it, under it, over it, then further off to the left, over and under, a
@@ -10067,7 +10318,7 @@ if (typeof defineAblation === "function") defineAblation("exp-ablation", {
   before: (st, name) => { if (name === "subject" || name === "effort") { st.seen = {}; st.saw = ""; } },
 });
 PAGES["exp-ablation"] = {
-  lights: { main: "tries", by: { preset: ["tries", "yours", "rmse"], sync: ["tries", "yours", "rmse"], bandpass: ["tries", "yours", "rmse"], apg: ["tries", "yours", "rmse"], imcheck: ["tries", "yours", "rmse"], median: ["tries", "yours", "rmse"], promRatio: ["tries", "yours", "rmse"], calibMode: ["parts", "rmse", "rmseFull"], subject: ["tries", "yours", "full", "rmse", "rmseFull"], effort: ["tries", "yours", "full"], drag: ["tries", "yours", "full", "beat", "rmse"] } },
+  lights: { main: "tries", by: { preset: ["tries", "yours", "rmse"], sync: ["tries", "yours", "rmse"], bandpass: ["tries", "yours", "rmse"], apg: ["tries", "yours", "rmse"], imcheck: ["tries", "yours", "rmse"], median: ["tries", "yours", "rmse"], promRatio: ["tries", "yours", "rmse"], calibMode: ["parts", "rmse", "rmseFull"], subject: ["tries", "yours", "rmse", "rmseFull"], effort: ["tries", "yours"], drag: ["tries", "yours", "beat", "rmse"] } },
   drag: "plane",
   update(S, { dt }) { const st = SIMS["exp-ablation"]; ablationFrame(st, dt); chxScene(S, st); },
   status() { const st = SIMS["exp-ablation"]; return ablIsFull(st.ctl) ? "Live · every part on" : `Live · ${ablLabel(st.ctl).parts}`; },
@@ -10090,8 +10341,9 @@ PAGES["exp-ablation"] = {
       if (worst) { st.saw = `Every part on: the DBP's RMSE is ${chxNum(rF, 1)} mmHg; the worst try, ${worst[1].label}, gave ${chxNum(worst[1].v, 1)} mmHg.`; st.sawQ = "all"; }
     }
     return {
-      // where the phone is: its beat's shape there, MA's depth against IM's (CHAIN.morphOf; the IM/MA check's reason)
-      beat: (() => { const u = chxPlace(st.sim), m = CHAIN.morphOf(u, 1), a = m.amp; return `${m.name}, MA ${Math.round((100 * a.ma) / a.im)} % of IM`; })(),
+      // where the phone is: MA's depth against IM's there (CHAIN.morphOf; the IM/MA check's reason); short, so the
+      // readout keeps one line and the column ends above the status line (feedback note 8)
+      beat: (() => { const a = CHAIN.morphOf(chxPlace(st.sim), 1).amp; return `MA ${Math.round((100 * a.ma) / a.im)} % of IM`; })(),
       yours: y == null ? "finding beats" : `${chxNum(y)} ms`, full: f == null ? "finding beats" : `${chxNum(f)} ms`,
       rmse: Number.isFinite(rY) ? `${chxNum(rY, 1)} mmHg` : "–", rmseFull: Number.isFinite(rF) ? `${chxNum(rF, 1)} mmHg` : "–",
       _bad: y != null && f != null && y > 2 * f + 5, saw: st.saw || "", sawQ: st.sawQ || "",
@@ -10154,7 +10406,7 @@ PAGES["exp-general"] = {
   // the press: the phone pressed in on the chest (the scene's grip, scene/use-sim.js), its share of the SCG
   handles: typeof seisPressHandle === "function" ? [seisPressHandle()] : [],
   update(S, { dt, step }) { const st = SIMS["exp-general"]; if (st.sim) genTab(st, step || 0); simFrame(st, dt); chxScene(S, st); },
-  status() { const st = SIMS["exp-general"], g = genState(st); return `Live · tremor ${g.tremor} mg · tissue ${g.tissue} · phone ${typeof seisPlaceWord === "function" ? seisPlaceWord(g.placeU) : g.placeU}`; },
+  status() { const st = SIMS["exp-general"], g = genState(st); return `Live · tremor ${g.tremor} mg · tissue ${g.tissue}`; }, // only what is set: the scene does not show the phone at a place (feedback 2)
   ro() {
     const st = SIMS["exp-general"]; if (!st.sim) return {};
     const g = genState(st), m = chxMeasure(g), base = chxMeasure({ ...g, tremor: 0, tissue: 1 }), tab = st.tab || 0, tried = st.tried || {};
@@ -10400,6 +10652,9 @@ defineLayout("exp-array", {
       const band = (y, words) => { line(g, V.X(0), V.Y(y), V.X(10), V.Y(y), rgba(C.ink, 0.25), 1.5, [6, 6]); text(g, words, V.X(10) - 6, V.Y(y) - 8, { size: 14, col: C["ink-3"], align: "right" }); };
       line(g, V.X(0), V.Y(0), V.X(0), V.Y(12), C["ink-3"], 3); text(g, "sternum", V.X(0) + 8, V.Y(11.2), { size: 14, col: C["ink-3"] });
       band(PL.lo, "below the pectoral"); band(PL.hi, "below the clavicle");
+      // the axes' unit: cm across from the sternum's line, cm up from below the pectoral
+      text(g, "cm from the sternum →", V.X(5), V.Y(0) + 50, { size: 14, col: C["ink-3"], align: "center" });
+      text(g, "cm", V.X(0) - 10, V.Y(6) + 24, { size: 14, col: C["ink-3"], align: "right" });
     },
     key: () => placeU().toFixed(1),
     ctl: { method: 0 },
@@ -10517,6 +10772,7 @@ defineLayout("exp-array", {
       out.ival = isFinite(B.read) ? `${f0(B.read)} ms` : B.err ? "no beat" : "timing…";
       out.off = isFinite(lead) ? `${lead < -0.5 ? "−" : ""}${f0(Math.abs(lead))} ms` : "–";
       for (const k of METHODS) { const v = rOf(k); out["r" + k] = v == null ? "running…" : f2(v); }
+      out.rpick = out["r" + m]; // the one R the column shows: the method picked's (the bars window holds all three)
       // what the try showed, once the reader has picked a method (nothing said before)
       const rm = rOf(m), rs = rOf("scg");
       out.saw = !M.tried || rm == null || rs == null ? ""
@@ -11017,6 +11273,42 @@ function guideTarget(s, at) {
 // More controls (pages.mjs, morectl) folds again at a press outside it: open, it lies over the lines above, the
 // reader's next step among them (run 31)
 document.addEventListener("pointerdown", (e) => { for (const d of document.querySelectorAll("details.morectl[open]")) if (!d.contains(e.target)) d.open = false; }, true);
+// The text column never runs into what stands under it (alpha.85; the owner, 2026-11-23: “这种overlapping是最基本的要解决的，
+// 无论哪里，都是不允许出现的”): where its controls, More controls opened, all its controls shown, or its readouts reach the
+// page's status line (.capsule) or the bar, the readouts' block, then the controls', take what room is left and scroll.
+// Run as a page shows, as More controls or “Show all controls” open, and whenever the column's size changes.
+function fitColumn(s) {
+  const t = s && s.querySelector(":scope > .text, .only:not([hidden]) > .text"); if (!t || !t.getClientRects().length) return;
+  const st = stage.getBoundingClientRect(), k = st.width / 1920 || 1, Y = (r) => (r - st.top) / k;
+  // the limit: a status line under the column (below its top, across its width), else the bar; a capsule above the
+  // column or beside it is no limit (SwimHR, 2026-11-23: a capsule at the top clipped its controls)
+  const tr = t.getBoundingClientRect(), under = [...s.querySelectorAll(".capsule")].filter((c) => { if (!c.getClientRects().length || getComputedStyle(c).visibility === "hidden") return false; const r = c.getBoundingClientRect(); return r.top > tr.top + 200 * k && r.left < tr.right && r.right > tr.left; });
+  const limit = Math.min(1000, ...under.map((c) => Y(c.getBoundingClientRect().top))) - 12;
+  const flow = () => Math.max(...[...t.children].filter((c) => c.getClientRects().length && getComputedStyle(c).position !== "absolute").map((c) => Y(c.getBoundingClientRect().bottom)), 0);
+  // (the readouts first, then the controls, then the steps; each down to a few lines, then, if the column is still too
+  // tall, each down to two lines)
+  const fits = [".ros", ".morectl[open] > .controls", ":scope > .controls", ".turns"].flatMap((q) => [...t.querySelectorAll(q)]).filter((e) => e.getClientRects().length);
+  for (const e of fits) { e.style.maxHeight = ""; e.classList.remove("fitscroll"); }
+  for (const least of [96, 56]) for (const e of fits) {
+    const over = flow() - limit; if (over <= 0) return;
+    const h = e.getBoundingClientRect().height / k; if (h <= least) continue;
+    // (cut between its rows, never through one: a row's letters are whole or scrolled away; MoiréLens' review, “tails cut”)
+    let want = Math.max(least, Math.floor(h - over)); const top = e.getBoundingClientRect().top, pb = parseFloat(getComputedStyle(e).paddingBottom) || 0;
+    const ends = [...e.children].filter((c) => c.getClientRects().length).map((c) => (c.getBoundingClientRect().bottom - top) / k).filter((b) => b + pb <= want);
+    if (ends.length) want = Math.max(least, Math.ceil(Math.max(...ends) + pb));
+    e.style.maxHeight = want + "px"; e.classList.add("fitscroll");
+  }
+}
+{ let fitT = 0, busy = false;
+  // a fit changes the column's size, which the observer sees: its own changes are not answered (no loop), and only a fold or a
+  // control the reader opens is fitted at once (WindDancer, 2026-11-23: an observer answering itself kept a page from starting)
+  const fit = () => { if (busy) return; busy = true; try { fitColumn(slides[cur]); } catch (e) {} requestAnimationFrame(() => requestAnimationFrame(() => { busy = false; })); };
+  const later = () => { clearTimeout(fitT); fitT = setTimeout(fit, 30); };
+  const now = () => { fit(); later(); };
+  document.addEventListener("toggle", now, true); document.addEventListener("click", later, true); addEventListener("resize", later);
+  if (window.ResizeObserver) { const ro = new ResizeObserver(() => { if (!busy) later(); }); for (const t of document.querySelectorAll(".slide .text")) ro.observe(t); }
+  addEventListener("hashchange", later); setInterval(fit, 1500);
+  if (window.__sw) window.__sw.fit = () => fitColumn(slides[cur]); } // (the checks: tools/rules.mjs, crowd; never made in a reader's browser)
 function guideRing(s) {
   // (an exploration's steps of the reader's: turnNow, below; on a page of tabs, the list of the tab shown)
   const gs = [...s.querySelectorAll(".guide, .turns")], g = gs.find((x) => x.getClientRects().length) || gs[0]; if (!g) return;
@@ -11668,7 +11960,7 @@ for (const pv of document.querySelectorAll(".about .abpv:not([data-live])")) {
     if (c.width === bw * 2 && c.height === bh * 2 && c.parentNode === pv) return;
     c.width = bw * 2; c.height = bh * 2;
     const g = c.getContext("2d", { willReadFrequently: true }), k = Math.max(c.width / img.naturalWidth, c.height / img.naturalHeight); // cover, centred
-    g.imageSmoothingQuality = "high"; g.drawImage(img, (c.width - img.naturalWidth * k) / 2, (c.height - img.naturalHeight * k) / 2, img.naturalWidth * k, img.naturalHeight * k);
+    g.imageSmoothingQuality = "high"; const right = !!pv.closest('[data-about="assets"]'); /* (the 3D assets' picture keeps its right edge, where its count stands: WindDancer's review, “23(”) */ g.drawImage(img, right ? c.width - img.naturalWidth * k : (c.width - img.naturalWidth * k) / 2, (c.height - img.naturalHeight * k) / 2, img.naturalWidth * k, img.naturalHeight * k);
     img.hidden = true; if (c.parentNode !== pv) pv.append(c);
   };
   aboutPics.push(paint);
@@ -13172,7 +13464,11 @@ function camSwitch() {
 // see. A deck with no data-camera (one written out, or a model from before 6.0.0-alpha.52) offers the camera where the
 // subject moves, as before. __sw.camOffer (the checks, tools/reader.mjs --offer) stands for every page's mark.
 const CAM_MOVES = ["hand", "upper", "head", "full"], CAM_DECLARED = slides.some((s) => s.hasAttribute("data-camera"));
+// the camera on one page only: the last page of Level 2, the end-to-end simulator (the owner, 2026-11-23: on Level 3's
+// pages the switch stood over the controls; “只在第二阶段的最后一页”)
+const CAM_PAGE = (() => { const l2 = slides.filter((s) => levelOf(s) === "2"); return l2.length ? l2[l2.length - 1] : null; })();
 function camMoves(sec) {
+  if (sec && CAM_PAGE && sec !== CAM_PAGE) return [];
   const v = (window.__sw && window.__sw.camOffer) || (CAM_DECLARED ? (sec && sec.dataset.camera) || "none" : "hand upper");
   return String(v).split(/\s+/).filter((m) => CAM_MOVES.includes(m));
 }
@@ -13434,9 +13730,12 @@ function readerUse(id) {
 // free thing's page has none here (the hand already turns it, js/free.js)
 const GEST_DOFS = ["turn"];
 const gestDofs = (id) => (freeOf(id) ? [] : GEST_DOFS);
-const gestOf = (id) => !!(PAGES[id] && SIMS[id] && (PAGES[id].handles || []).some((h) => gestDofs(id).includes(h.dof)));
+// a handle with camera: false is the mouse's alone (alpha.85; MoiréWidgets, the owner's “camera mode keeps only the slider”): the
+// hand neither turns it nor is told it can
+const camHandle = (h, id) => gestDofs(id).includes(h.dof) && h.camera !== false;
+const gestOf = (id) => !!(PAGES[id] && SIMS[id] && (PAGES[id].handles || []).some((h) => camHandle(h, id)));
 // the handles the hand moves now: those the page drew this frame (shown, their grip on the frame: HANDLES_AT)
-const gestNow = (id) => (gestOf(id) ? HANDLES_AT.filter((e) => e.st && e.st.id === id && gestDofs(id).includes(e.h.dof)) : []);
+const gestNow = (id) => (gestOf(id) ? HANDLES_AT.filter((e) => e.st && e.st.id === id && camHandle(e.h, id)) : []);
 const wrapDeg = (d) => ((((d + 180) % 360) + 360) % 360) - 180;
 function feedGestures(id, p, t, fresh) {
   const hs = gestNow(id);
@@ -13902,7 +14201,7 @@ const FB_H2C = "https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2can
 const PAGE_THUMBS = {"about":"thumbs/about.jpg","all":"thumbs/all.jpg","c1":"thumbs/c1.jpg","c2":"thumbs/c2.jpg","c3":"thumbs/c3.jpg","c4":"thumbs/c4.jpg","demo":"thumbs/demo.jpg","exp-ablation":"thumbs/exp-ablation.jpg","exp-array":"thumbs/exp-array.jpg","exp-general":"thumbs/exp-general.jpg","exp-kg":"thumbs/exp-kg.jpg","exp-kg2":"thumbs/exp-kg2.jpg","exp-physics":"thumbs/exp-physics.jpg","exp-related":"thumbs/exp-related.jpg","exp-world":"thumbs/exp-world.jpg","explore":"thumbs/explore.jpg","gap":"thumbs/gap.jpg","how":"thumbs/how.jpg","idea":"thumbs/idea.jpg","inuse":"thumbs/inuse.jpg","level-1":"thumbs/level-1.jpg","motivation":"thumbs/motivation.jpg","open":"thumbs/open.jpg","s1":"thumbs/s1.jpg","s2":"thumbs/s2.jpg","s3":"thumbs/s3.jpg","s4":"thumbs/s4.jpg","see":"thumbs/see.jpg","sense2sim":"thumbs/sense2sim.jpg","sim-real":"thumbs/sim-real.jpg","start-2":"thumbs/start-2.jpg","start":"thumbs/start.jpg","terms":"thumbs/terms.jpg","title":"thumbs/title.jpg","use":"thumbs/use.jpg","who":"thumbs/who.jpg"};
 // what each answer says it came from: the simulation (its repository's name, Sense2Sim-<paper>), the kit's version and
 // the kind of reader (as picked on the first page, or the default kind marked "not picked"); tools/site.mjs fills S2S_SITE
-const S2S_SITE = {"name":"Sense2Sim-Seismo","kit":"6.0.0-alpha.82","title":"Seismo: Blood Pressure Monitoring using Built-in Smartphone Accelerometer and Camera","url":"https://ambient-intelligence-lab-umich-eecs.github.io/Sense2Sim-Seismo/","build":"20261123T022152","opening":true};
+const S2S_SITE = {"name":"Sense2Sim-Seismo","kit":"6.0.0-alpha.82","title":"Seismo: Blood Pressure Monitoring using Built-in Smartphone Accelerometer and Camera","url":"https://ambient-intelligence-lab-umich-eecs.github.io/Sense2Sim-Seismo/","build":"20261123T102938","opening":true};
 const s2sSite = () => S2S_SITE.name || (location.pathname.match(/\/(Sense2Sim-[^/]+)\//) || [])[1] || document.title;
 const s2sKit = () => S2S_SITE.kit || "";
 // A reader never works on an older page than the site's (the owner, 2026-11-22: “每次进入强制刷新浏览器缓存”): as the page
@@ -13925,6 +14224,8 @@ const s2sKit = () => S2S_SITE.kit || "";
   // page of it (the owner, 2026-11-22: “这个后面的show me直接就回到这个界面，而不是还是simulation里的那个界面”)
   document.addEventListener("click", (e) => { const b = e.target.closest && e.target.closest(".btn.go[data-fwd]"); if (!b || !b.closest(".slide") || !b.closest(".slide").querySelector(".abthanks")) return; e.preventDefault(); e.stopImmediatePropagation(); back(); }, true);
   if (typeof go === "function") wrap(); else addEventListener("DOMContentLoaded", wrap);
+  // the simulator drawn: the paper of the way in leaves (opening/entrance.js, from deck.html)
+  if (window.S2S_ENTRANCE) requestAnimationFrame(() => requestAnimationFrame(() => window.S2S_ENTRANCE.ready()));
 })();
 (function freshPage() {
   if (typeof document === "undefined" || navigator.webdriver || !S2S_SITE.build || !/^https?:/.test(location.protocol)) return;
@@ -14971,7 +15272,10 @@ const AU_FONT = (typeof document !== "undefined" && getComputedStyle(document.do
   };
   // no way off a page whose scores are wanted and not given, forward, back or to the table (the owner, 2026-11-22: “依然
   // 存在没有rate就往下一页跳的情况”): with its card open, the card shakes; without, the card comes, and goes there once scored
-  const owes = () => on() && !done() && rateable().some((p) => p.i === cur) && (isExp() || step >= stepsOf(slides[cur]));
+  // (a page whose clip still waits at its set-up has not ended: the clip plays first, then the card comes. Before, a way off
+  // brought the card while the clip waited, and → then played the clip or brought the card by how far the clip had got:
+  // MoiréLens's and Seismo's study walks failed at a different step each run)
+  const owes = () => on() && !done() && rateable().some((p) => p.i === cur) && (isExp() || (step >= stepsOf(slides[cur]) && !held()));
   const go0 = go; go = function (i, s) {
     if (introOpen && i !== cur) return void nudgeIntro();
     // a reader out of the study, a simulation the authors scored: their certificate is a page of its own after the second
