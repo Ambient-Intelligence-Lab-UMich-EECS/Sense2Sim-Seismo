@@ -1,16 +1,16 @@
 {
   "from": {
-    "file": "/tmp/sw-site-jH6lvt/page/index.html",
-    "bytes": 18807871,
-    "sha256": "f325f46f2ec40e942d80b583e86e09511e59d904313a6111f3b36f4a52b23799"
+    "file": "/tmp/sw-site-GBzwZ0/page/index.html",
+    "bytes": 18809763,
+    "sha256": "df3c27b21158e3442365078f2610d921631a57a45f712f16d6af7e7d019ce668"
   },
   "page": {
     "path": "index.html",
-    "bytes": 1515811,
-    "sha256": "3d8ed3c1aac0593a1a8d7a11d36ba499c29ba0a0bdd5e2cbbb066d4c7fac1aac"
+    "bytes": 1517703,
+    "sha256": "b8d78deae9348a84e2f1e4bbd0d6bdfc9e87c5f1ad950de7655e65e848370c4b"
   },
   "library": "/nfs/turbo/coe-kesuniot1/senseweaver/library/current",
-  "kb": "/nfs/turbo/coe-kesuniot1/senseweaver/bench/seismo-kit82-2026-11-21/kb/kb.json",
+  "kb": "/nfs/turbo/coe-kesuniot1/senseweaver/staging/2026-11-18-a61/kit85/kb/kb.json",
   "files": [
     {
       "path": "library/P02.txt",
