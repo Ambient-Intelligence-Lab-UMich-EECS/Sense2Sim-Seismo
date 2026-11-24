@@ -1,13 +1,13 @@
 {
   "from": {
-    "file": "/tmp/sw-site-8SwLtz/page/index.html",
-    "bytes": 18792657,
-    "sha256": "94fd0ed9ca6f1e1155e76a1e2e74177e2458d7e06fb2bf301fb8f0271a3cc625"
+    "file": "/tmp/sw-site-jH6lvt/page/index.html",
+    "bytes": 18807871,
+    "sha256": "f325f46f2ec40e942d80b583e86e09511e59d904313a6111f3b36f4a52b23799"
   },
   "page": {
     "path": "index.html",
-    "bytes": 1500597,
-    "sha256": "0144b9d8f11724284fdbdbb554a97b0ec7e7a53130208428455a4137def68f74"
+    "bytes": 1515811,
+    "sha256": "3d8ed3c1aac0593a1a8d7a11d36ba499c29ba0a0bdd5e2cbbb066d4c7fac1aac"
   },
   "library": "/nfs/turbo/coe-kesuniot1/senseweaver/library/current",
   "kb": "/nfs/turbo/coe-kesuniot1/senseweaver/bench/seismo-kit82-2026-11-21/kb/kb.json",
